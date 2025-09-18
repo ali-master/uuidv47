@@ -1,7 +1,7 @@
 {
   "name": "@usex/uuidv47",
   "description": "A TypeScript implementation of UUIDv47 - reversible UUID v4/v7 transformation using SipHash-2-4",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "files": [
     "dist",
