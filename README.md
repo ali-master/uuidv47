@@ -1,6 +1,6 @@
 <div align="center">
     <img src="assets/logo.svg" alt="UUIDv47 TypeScript Logo" width="120" height="120" />
-    <h1>UUIDv47 TypeScript</h1>
+    <h1>UUIDv47</h1>
     <p><strong>Reversible UUID v4/v7 transformation using SipHash-2-4</strong></p>
     
 [![NPM Version](https://img.shields.io/npm/v/@usex/uuidv47?style=flat-square&color=blue)](https://www.npmjs.com/package/@usex/uuidv47)
