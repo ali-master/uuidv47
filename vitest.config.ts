@@ -38,9 +38,6 @@ export default defineConfig({
       reporter: ["clover", "json", "html", "html-spa"],
       reportsDirectory: path.resolve(__dirname, "./coverage"),
     },
-    cache: {
-      dir: path.resolve(__dirname, "node_modules/.cache/vitest"),
-    },
     globals: true,
     isolate: true,
     update: true,
