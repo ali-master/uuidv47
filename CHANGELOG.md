@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/ali-master/uuidv47/compare/0.1.0...0.2.0) (2025-09-18)
+
+### Features
+
+* remove common js support options and use only module pattern ([b801825](https://github.com/ali-master/uuidv47/commit/b801825efd3fa81383d48ff444ca4a9092631dc3))
+* update README with bundle size and performance metrics ([af9d808](https://github.com/ali-master/uuidv47/commit/af9d80843caa23415e15d014071669d2bfcc3042))
+
+### Code Refactoring
+
+* split the index.ts into multiple files ([beafee9](https://github.com/ali-master/uuidv47/commit/beafee90cf41a8dde1b1161ca509c17c21681bca))
+
 ## 0.1.0 (2025-09-18)
 
 ### Features
