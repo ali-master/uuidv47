@@ -8,17 +8,12 @@
     "./dist"
   ],
   "module": "./dist/index.js",
-  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
       }
     },
     "./package.json": "./package.json"
@@ -29,6 +24,7 @@
     "url": "https://github.com/ali-master",
     "email": "ali_4286@live.com"
   },
+  "homepage": "https://gihtub.com/ali-master/uuidv47#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ali-master/uuidv47.git"
@@ -45,6 +41,7 @@
     "siphash-2-4",
     "usex"
   ],
+  "sideEffects": false,
   "scripts": {
     "prepack": "bunup",
     "build": "bunup",

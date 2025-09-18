@@ -1,7 +1,7 @@
 # source
 src
-index.ts
 package-lock.json
+bun.lock
 tslint.json
 tsconfig.json
 .prettierrc
