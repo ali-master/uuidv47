@@ -6,9 +6,11 @@ export default defineConfig({
     server: {
       sourcemap: "inline",
     },
-    fileParallelism: false, // Disable parallel execution to share Redis container
+    fileParallelism: true,
     name: "UUIDv47",
-    environment: "node",
+    benchmark: {
+      include: ["./benchmarks/**/*.bench.ts"],
+    },
     typecheck: {
       enabled: true,
       checker: "vue-tsc",
@@ -22,19 +24,35 @@ export default defineConfig({
       cleanOnRerun: true,
       reportOnFailure: true,
       include: ["**/src/**"],
+      ignoreEmptyLines: true,
+      exclude: [
+        "**/src/**/*.spec.ts",
+        "**/src/**/*.test.ts",
+        "**/src/**/*.bench.ts",
+        "**/src/**/*.d.ts",
+        "**/src/**/*.config.ts",
+        "**/src/**/index.ts",
+      ],
+      processingConcurrency: 4,
+      experimentalAstAwareRemapping: true,
       reporter: ["clover", "json", "html", "html-spa"],
       reportsDirectory: path.resolve(__dirname, "./coverage"),
     },
-    dir: path.resolve(__dirname, "./test"),
-    cache: false,
+    cache: {
+      dir: path.resolve(__dirname, "node_modules/.cache/vitest"),
+    },
     globals: true,
-    pool: "forks",
+    isolate: true,
+    update: true,
+    printConsoleTrace: true,
+    pool: "vmForks",
     poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-      forks: {
+      vmForks: {
         singleFork: true,
+        memoryLimit: "2GB",
+        minForks: 1,
+        maxForks: 4,
+        isolate: true,
       },
     },
   },

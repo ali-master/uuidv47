@@ -56,6 +56,7 @@
     "test:junit": "bun run test --reporter=junit --outputFile=test-report.junit.xml",
     "test:watch": "bun run test --watch",
     "test:ui": "bun run test --ui --coverage.enabled=true",
+    "test:bench": "cross-env CI=true vitest bench",
     "test:coverage": "bun run test run --coverage",
     "test:debug": "vitest --inspect-brk --pool forks --poolOptions.forks.singleFork",
     "test:debug:watch": "bun run test:debug --watch --poolOptions.threads.isolate false",

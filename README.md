@@ -308,17 +308,47 @@ try {
 
 ## ⚡ Performance
 
-UUIDv47 is optimized for production use with exceptional performance characteristics:
+UUIDv47 is optimized for production use with exceptional performance characteristics based on comprehensive benchmarking:
 
-### Benchmarks
+### Core Operations Benchmarks
 
 | Operation | Performance | Notes |
 |-----------|-------------|-------|
-| **Encode v7→v4** | >15,000 ops/sec | Single-threaded on modern CPU |
-| **Decode v4→v7** | >15,000 ops/sec | Same performance as encoding |
-| **Key Generation** | >50,000 ops/sec | Cryptographically secure |
-| **UUID Parsing** | >100,000 ops/sec | Optimized string validation |
-| **UUID Formatting** | >100,000 ops/sec | Efficient hex encoding |
+| **Encode v7→v4** | **~149,000 ops/sec** | Single UUID transformation |
+| **Decode v4→v7** | **~150,000 ops/sec** | Single UUID transformation |
+| **Roundtrip (encode+decode)** | **~75,000 ops/sec** | Full transformation cycle |
+| **Batch Encode (100 UUIDs)** | **~1,500 ops/sec** | Batch processing throughput |
+| **Batch Decode (100 UUIDs)** | **~1,500 ops/sec** | Batch processing throughput |
+
+### Key Management Performance
+
+| Operation | Performance | Notes |
+|-----------|-------------|-------|
+| **Create from BigInts** | **~16.4M ops/sec** | Ultra-fast key creation |
+| **Create from Buffer** | **~10M ops/sec** | Buffer-based key creation |
+| **Generate Random Key** | **~685,000 ops/sec** | Cryptographically secure |
+| **Batch Key Generation (100)** | **~7,300 ops/sec** | Bulk key operations |
+
+### String/Buffer Operations
+
+| Operation | Performance | Notes |
+|-----------|-------------|-------|
+| **Parse UUID String** | **~5.7M ops/sec** | String to Buffer conversion |
+| **Format UUID Buffer** | **~2.7M ops/sec** | Buffer to String conversion |
+| **Get UUID Version** | **~16.6M ops/sec** | Version extraction |
+| **Parse-Format Roundtrip** | **~2M ops/sec** | Full string processing cycle |
+| **UUID Validation Workflow** | **~5.5M ops/sec** | Parse + version check |
+
+### Real-World Usage Patterns
+
+| Scenario | Performance | Notes |
+|----------|-------------|-------|
+| **Service Pattern (Public)** | **~137,000 ops/sec** | Single transformation to public ID |
+| **Service Pattern (Internal)** | **~69,000 ops/sec** | Single transformation from public ID |
+| **Multi-Tenant Encode** | **~140,500 ops/sec** | Single tenant transformation |
+| **Multi-Tenant (5 tenants)** | **~27,800 ops/sec** | Round-robin across tenants |
+| **API Response (10 IDs)** | **~13,700 ops/sec** | Batch ID hiding simulation |
+| **Security Validation** | **~56,900 ops/sec** | Key isolation verification |
 
 ### Memory Usage
 
@@ -327,6 +357,14 @@ UUIDv47 is optimized for production use with exceptional performance characteris
 - **16 bytes** per UUIDv47Key (two bigints)
 - **Minimal overhead** - direct memory operations
 
+### Performance Characteristics
+
+- **Consistent Performance**: Sub-millisecond latency for single operations
+- **Scalable Batching**: Efficient batch processing for high-throughput scenarios  
+- **Memory Efficient**: Direct buffer operations without unnecessary allocations
+- **CPU Optimized**: BigInt arithmetic optimized for 64-bit operations
+- **Cache Friendly**: Lookup tables and inlined operations for critical paths
+
 ### Optimization Features
 
 - **BigInt arithmetic** for 64-bit operations
@@ -334,6 +372,14 @@ UUIDv47 is optimized for production use with exceptional performance characteris
 - **Lookup tables** for hex conversion
 - **Inlined operations** for critical paths
 - **TypeScript optimizations** compiled to efficient JavaScript
+- **SipHash-2-4** optimized implementation with minimal overhead
+
+### Benchmark Environment
+
+- **Runtime**: Bun/Node.js on modern CPU
+- **Iterations**: 50K-100K+ per test for statistical significance
+- **Methodology**: Vitest benchmark framework with multiple runs
+- **Hardware**: Results may vary based on hardware configuration
 
 ## 🔐 Security Best Practices
 
@@ -417,7 +463,10 @@ bun install
 bun run dev
 
 # Run tests
-bun test
+bun run test
+
+# Run benchmarks
+bun run test:bench
 
 # Build for production
 bun run build
