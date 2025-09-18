@@ -1,0 +1,89 @@
+{
+  "name": "@usex/uuidv47",
+  "description": "A TypeScript implementation of UUIDv47 - reversible UUID v4/v7 transformation using SipHash-2-4",
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "./dist"
+  ],
+  "module": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Ali Torki",
+    "url": "https://github.com/ali-master",
+    "email": "ali_4286@live.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ali-master/uuidv47.git"
+  },
+  "keywords": [
+    "uuid",
+    "uuidv4",
+    "uuidv7",
+    "uuidv47",
+    "reversible",
+    "transformation",
+    "typescript",
+    "siphash",
+    "siphash-2-4",
+    "usex"
+  ],
+  "scripts": {
+    "prepack": "bunup",
+    "build": "bunup",
+    "dev": "bunup --watch",
+    "clean": "bunx rimraf dist",
+    "clean:all": "bunx rimraf dist node_modules",
+    "test:types": "tsc --noEmit",
+    "test": "CI=true vitest",
+    "test:junit": "bun run test --reporter=junit --outputFile=test-report.junit.xml",
+    "test:watch": "bun run test --watch",
+    "test:ui": "bun run test --ui --coverage.enabled=true",
+    "test:coverage": "bun run test run --coverage",
+    "test:debug": "vitest --inspect-brk --pool forks --poolOptions.forks.singleFork",
+    "test:debug:watch": "bun run test:debug --watch --poolOptions.threads.isolate false",
+    "format": "prettier --write \"**/*.ts\"",
+    "prepare": "bun run build",
+    "prepublish:next": "bun run build",
+    "publish:next": "bun publish --access public --tag next",
+    "prepublish:npm": "bun run build",
+    "publish:npm": "bun publish --access public",
+    "prerelease": "bun run build",
+    "release": "release-it",
+    "preinstall": "bunx is-ci || bunx only-allow bun"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^10.0.1",
+    "@types/node": "^24.5.2",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "bunup": "^0.11.26",
+    "cross-env": "^10.0.0",
+    "prettier": "^3.6.2",
+    "release-it": "^19.0.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "bun@1.2.22"
+}

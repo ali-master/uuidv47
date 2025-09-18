@@ -1,0 +1,83 @@
+{
+  "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
+  "git": {
+    "commitMessage": "chore(): release v${version}",
+    "commit": true,
+    "tag": true,
+    "push": true
+  },
+  "npm": true,
+  "github": {
+    "release": true
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits",
+        "types": [
+          {
+            "type": "feat",
+            "section": "Features"
+          },
+          {
+            "type": "fix",
+            "section": "Bug Fixes"
+          },
+          {
+            "type": "perf",
+            "section": "Performance Improvements"
+          },
+          {
+            "type": "docs",
+            "section": "Documentation"
+          },
+          {
+            "type": "style",
+            "section": "Styles"
+          },
+          {
+            "type": "refactor",
+            "section": "Code Refactoring"
+          },
+          {
+            "type": "test",
+            "section": "Tests"
+          },
+          {
+            "type": "build",
+            "section": "Build System"
+          },
+          {
+            "type": "ci",
+            "section": "Continuous Integration"
+          },
+          {
+            "type": "chore",
+            "section": "Chores"
+          },
+          {
+            "type": "revert",
+            "section": "Reverts"
+          },
+          {
+            "type": "wip",
+            "section": "Work in Progress"
+          },
+          {
+            "type": "types",
+            "section": "Type Definitions"
+          },
+          {
+            "type": "deprecate",
+            "section": "Deprecations"
+          },
+          {
+            "type": "security",
+            "section": "Security"
+          }
+        ]
+      },
+      "infile": "CHANGELOG.md"
+    }
+  }
+}
