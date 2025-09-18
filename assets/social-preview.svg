@@ -1,75 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
 <svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <style>
-        .title {
-        font-family: &apos;Inter&apos;, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto, Helvetica, Arial, sans-serif;
-        font-size: 96px;
-        font-weight: 800;
-        }
-        .desc {
-        font-family: &apos;Inter&apos;, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto, Helvetica, Arial, sans-serif;
-        font-size: 36px;
-        font-weight: 400;
-        fill: #A0AEC0; /* gray-400 */
-        letter-spacing: 0.5px;
-        }
-        .ts-badge-text {
-        font-family: &apos;Inter&apos;, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto, Helvetica, Arial, sans-serif;
-        font-size: 24px;
-        font-weight: 600;
-        fill: #FFFFFF;
-        }
-    </style>
-    <!--Background-->
-    <rect width="1280" height="640" fill="#0D1117"/>
-    <defs>
-        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2D3748" stroke-width="1"/>
-        </pattern>
-        <linearGradient id="title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#38B2AC"/>
-            <stop offset="100%" stop-color="#ED8936"/>
-        </linearGradient>
-    </defs>
-    <rect width="1280" height="640" fill="url(#grid)" opacity="0.5"/>
-    <!--Left Side: Logo-->
-    <g transform="translate(120, 160) scale(1.25)">
-        <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="cool-gradient-sp" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#38B2AC"/>
-                    <stop offset="100%" stop-color="#3182CE"/>
-                </linearGradient>
-                <linearGradient id="warm-gradient-sp" x1="1" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#ED8936"/>
-                    <stop offset="100%" stop-color="#DD6B20"/>
-                </linearGradient>
-                <filter id="glow-sp" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                    <feMerge>
-                        <feMergeNode in="coloredBlur"/>
-                        <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                </filter>
-            </defs>
-            <rect width="256" height="256" rx="48" fill="#1A202C"/>
-            <g filter="url(#glow-sp)">
-                <path d="M64 128 C64 64, 192 64, 192 128" stroke="url(#cool-gradient-sp)" stroke-width="20" stroke-linecap="round" fill="none"/>
-                <path d="M192 128 C192 192, 64 192, 64 128" stroke="url(#warm-gradient-sp)" stroke-width="20" stroke-linecap="round" fill="none"/>
-            </g>
-            <line x1="128" y1="80" x2="128" y2="176" stroke="white" stroke-opacity="0.2" stroke-width="2"/>
-            <text x="96" y="148" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="bold" fill="white" text-anchor="middle">4</text>
-            <text x="160" y="148" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="bold" fill="white" text-anchor="middle">7</text>
-        </svg>
+  <defs>
+    <linearGradient id="clean-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.5" stop-color="#1E293B"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+    <pattern id="subtle-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(78,205,196,0.03)" stroke-width="0.5"/>
+    </pattern>
+    <pattern id="accent-dots" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
+      <circle cx="60" cy="60" r="1" fill="rgba(78,205,196,0.08)"/>
+    </pattern>
+    <linearGradient id="neural-flow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0" stop-color="#FF9A9E"/>
+      <stop offset="0.25" stop-color="#FECFEF"/>
+      <stop offset="0.5" stop-color="#A8EDEA"/>
+      <stop offset="0.75" stop-color="#FFD3A5"/>
+      <stop offset="1" stop-color="#96CEB4"/>
+    </linearGradient>
+    <linearGradient id="data-stream" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0" stop-color="#4ECDC4"/>
+      <stop offset="0.5" stop-color="#45B7D1"/>
+      <stop offset="1" stop-color="#96CEB4"/>
+    </linearGradient>
+    <linearGradient id="holo-text" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0" stop-color="#FF6B6B"/>
+      <stop offset="0.2" stop-color="#4ECDC4"/>
+      <stop offset="0.4" stop-color="#45B7D1"/>
+      <stop offset="0.6" stop-color="#96CEB4"/>
+      <stop offset="0.8" stop-color="#FFD3A5"/>
+      <stop offset="1" stop-color="#FF9A9E"/>
+    </linearGradient>
+    <filter id="cyber-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shimmer" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feOffset dx="0.5" dy="0.5" result="offset"/>
+      <feFlood flood-color="#4ECDC4" flood-opacity="0.15"/>
+      <feComposite in2="offset" operator="in"/>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+    <filter id="glass" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.8"/>
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.95 0"/>
+    </filter>
+    <marker id="arrow-down" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0,0 8,0 4,8" fill="#96CEB4"/>
+    </marker>
+  </defs>
+  <rect width="1280" height="640" fill="url(#clean-bg)"/>
+  <rect width="1280" height="640" fill="url(#subtle-grid)"/>
+  <rect width="1280" height="640" fill="url(#accent-dots)"/>
+  <g opacity="0.15">
+    <polygon points="200,100 220,80 240,100 220,120" fill="#4ECDC4">
+      <animateTransform attributeName="transform" type="rotate" values="0 220 100;360 220 100" dur="20s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="1000,200 1025,175 1050,200 1025,225" fill="#FF6B6B">
+      <animateTransform attributeName="transform" type="rotate" values="360 1025 200;0 1025 200" dur="25s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="150,500 175,475 200,500 175,525" fill="#45B7D1">
+      <animateTransform attributeName="transform" type="rotate" values="0 175 500;360 175 500" dur="30s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+  <g transform="matrix(1, 0, 0, 1, 100, 92.530121)">
+    <text font-family="'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif" font-size="96" font-weight="900" fill="url(#holo-text)" filter="url(#cyber-glow)" style="white-space: pre;">UUIDv47</text>
+    <text y="120" font-family="'SF Mono', Monaco, monospace" font-size="32" font-weight="500" fill="#4ECDC4" opacity="0.9" style="white-space: pre;">
+      <tspan>Quantum UUID Transformation</tspan>
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+    </text>
+    <text y="165" font-family="'SF Mono', Monaco, monospace" font-size="24" font-weight="400" fill="#96CEB4" opacity="0.8" style="white-space: pre;">SipHash-2-4 Cryptographic Engine • TypeScript</text>
+  </g>
+  <g>
+    <g transform="translate(150, 360)">
+      <circle cx="0" cy="0" r="40" fill="rgba(255,154,158,0.2)" stroke="#FF9A9E" stroke-width="2" filter="url(#shimmer)"/>
+      <text x="0" y="6" font-family="'SF Mono', Monaco, monospace" font-size="16" font-weight="700" fill="#FF9A9E" text-anchor="middle" style="white-space: pre;">v7</text>
+      <g transform="translate(-20, -20)">
+        <rect width="8" height="4" rx="1" fill="#FF6B6B" opacity="0.8">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="12" width="8" height="4" rx="1" fill="#FF6B6B" opacity="0.6">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" begin="0.3s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="24" width="8" height="4" rx="1" fill="#FF6B6B" opacity="0.7">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="36" width="8" height="4" rx="1" fill="#FF6B6B" opacity="0.9">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" begin="0.9s" repeatCount="indefinite"/>
+        </rect>
+      </g>
+      <text x="0" y="60" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#FF9A9E" text-anchor="middle" style="white-space: pre;">Internal UUID</text>
     </g>
-    <!--Right Side: Text Content-->
-    <g transform="translate(540, 210)">
-        <text class="title" y="0" fill="url(#title-grad)">UUIDv47</text>
-        <text class="desc" y="65">Reversible UUID v4/v7 transformation</text>
-        <text class="desc" y="110">using SipHash-2-4.</text>
-        <!--TypeScript Badge-->
-        <g transform="translate(0, 160)">
-            <rect x="0.5" y="0.5" width="179" height="43" rx="7.5" fill="#2D3748" stroke="#4A5568"/>
-            <text class="ts-badge-text" x="18" y="29">TypeScript</text>
-        </g>
+    <g transform="translate(480, 360)">
+      <polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" fill="rgba(78,205,196,0.1)" stroke="url(#data-stream)" stroke-width="3" filter="url(#cyber-glow)">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="10s" repeatCount="indefinite"/>
+      </polygon>
+      <circle r="20" fill="none" stroke="#4ECDC4" stroke-width="1" stroke-dasharray="4,4" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="35" fill="none" stroke="#45B7D1" stroke-width="1" stroke-dasharray="2,6" opacity="0.5">
+        <animateTransform attributeName="transform" type="rotate" values="360;0" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="0" y="8" font-family="'SF Mono', Monaco, monospace" font-size="24" font-weight="bold" fill="#4ECDC4" text-anchor="middle" filter="url(#cyber-glow)" style="white-space: pre;">⊕</text>
+      <text x="0" y="65" font-family="'SF Mono', Monaco, monospace" font-size="14" font-weight="600" fill="#4ECDC4" text-anchor="middle" style="white-space: pre;">SipHash-2-4</text>
     </g>
+    <g transform="translate(810, 360)">
+      <circle cx="0" cy="0" r="40" fill="rgba(168,237,234,0.2)" stroke="#A8EDEA" stroke-width="2" filter="url(#shimmer)"/>
+      <text x="0" y="6" font-family="'SF Mono', Monaco, monospace" font-size="16" font-weight="700" fill="#A8EDEA" text-anchor="middle" style="white-space: pre;">v4</text>
+      <g transform="translate(-20, -20)">
+        <polygon points="5,0 10,2 5,8 0,2" fill="#A8EDEA" opacity="0.8">
+          <animateTransform attributeName="transform" type="rotate" values="0 5 4;360 5 4" dur="3s" repeatCount="indefinite"/>
+        </polygon>
+        <polygon points="17,0 22,2 17,8 12,2" fill="#A8EDEA" opacity="0.6">
+          <animateTransform attributeName="transform" type="rotate" values="360 17 4;0 17 4" dur="3s" repeatCount="indefinite"/>
+        </polygon>
+        <polygon points="29,0 34,2 29,8 24,2" fill="#A8EDEA" opacity="0.7">
+          <animateTransform attributeName="transform" type="rotate" values="0 29 4;360 29 4" dur="3s" begin="1s" repeatCount="indefinite"/>
+        </polygon>
+        <polygon points="41,0 46,2 41,8 36,2" fill="#A8EDEA" opacity="0.9">
+          <animateTransform attributeName="transform" type="rotate" values="360 41 4;0 41 4" dur="3s" begin="1s" repeatCount="indefinite"/>
+        </polygon>
+      </g>
+      <text x="0" y="60" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#A8EDEA" text-anchor="middle" style="white-space: pre;">Public Facade</text>
+    </g>
+    <g filter="url(#cyber-glow)">
+      <path d="M 190 360 Q 335 350 454 360" stroke="url(#neural-flow)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8">
+        <animate attributeName="stroke-dasharray" values="0,300;60,240;0,300" dur="4s" repeatCount="indefinite"/>
+      </path>
+      <path d="M 506 360 Q 658 350 770 360" stroke="url(#neural-flow)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8">
+        <animate attributeName="stroke-dasharray" values="0,300;60,240;0,300" dur="4s" begin="2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M 480 400 L 480 420" stroke="#96CEB4" stroke-width="3" marker-end="url(#arrow-down)" opacity="0.6">
+        <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
+      </path>
+      <text x="480" y="445" font-family="'SF Mono', Monaco, monospace" font-size="10" fill="#96CEB4" text-anchor="middle" style="white-space: pre;">REVERSIBLE</text>
+    </g>
+  </g>
+  <g transform="matrix(0.9375, 0, 0, 1, 900, 350)" style="">
+    <rect width="320" height="240" rx="20" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1" filter="url(#glass)"/>
+    <g transform="matrix(1, 0, 0, 1, 16.670895, 1.404565)">
+      <text y="25" font-family="'SF Mono', Monaco, monospace" font-size="14" fill="#4ECDC4" style="white-space: pre;">// Quantum transformation</text>
+      <text y="50" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#FF9A9E" style="white-space: pre;">const <tspan fill="#FFD3A5">key</tspan> = <tspan fill="#96CEB4">UUIDv47</tspan></text>
+      <text y="70" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#FF9A9E" style="white-space: pre;">  .<tspan fill="#A8EDEA">generateRandomKey</tspan>();</text>
+      <text y="100" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#4ECDC4" style="white-space: pre;">// Transform reality</text>
+      <text y="125" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#FF9A9E" style="white-space: pre;">const <tspan fill="#FFD3A5">facade</tspan> = <tspan fill="#96CEB4">UUIDv47</tspan></text>
+      <text y="145" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#FF9A9E" style="white-space: pre;">  .<tspan fill="#A8EDEA">encodeV4Facade</tspan>(<tspan fill="#FFD3A5">v7</tspan>, <tspan fill="#FFD3A5">key</tspan>);</text>
+      <text y="175" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#4ECDC4" style="white-space: pre;">// Reverse the quantum state</text>
+      <text y="200" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#FF9A9E" style="white-space: pre;">const <tspan fill="#FFD3A5">original</tspan> = <tspan fill="#96CEB4">UUIDv47</tspan></text>
+      <text y="220" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#FF9A9E" style="white-space: pre;">  .<tspan fill="#A8EDEA">decodeV4Facade</tspan>(<tspan fill="#FFD3A5">facade</tspan>, <tspan fill="#FFD3A5">key</tspan>);</text>
+    </g>
+  </g>
+  <g transform="translate(80, 520)" opacity="0.8">
+    <rect width="455.434" height="80" rx="15" fill="rgba(78,205,196,0.1)" stroke="rgba(78,205,196,0.3)" stroke-width="1" style="" x="20"/>
+    <text x="162.736" y="24.819" font-family="'SF Mono', Monaco, monospace" font-size="16" font-weight="600" fill="#4ECDC4" style="white-space: pre; font-size: 16px;">PERFORMANCE METRICS</text>
+    <text x="32.838" y="57.968" font-family="'SF Mono', Monaco, monospace" font-size="12" fill="#96CEB4" style="white-space: pre; font-size: 12px;">15,000+ ops/sec • Zero-allocation • Cryptographically Secure</text>
+  </g>
+  <text x="640" y="620" font-family="'SF Mono', Monaco, monospace" font-size="14" fill="url(#holo-text)" text-anchor="middle" opacity="0.6" style="white-space: pre;">Quantum UUID Engineering • TypeScript • Open Source</text>
 </svg>
