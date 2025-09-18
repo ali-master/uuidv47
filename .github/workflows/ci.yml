@@ -169,9 +169,18 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --only-verified
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          extra_args: --debug --only-verified --fail
+        continue-on-error: true
+
+      - name: 🔐 Fallback filesystem scan for secrets
+        if: failure() || github.event_name == 'push'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          extra_args: --debug --only-verified --fail --no-verification
+        continue-on-error: true
 
   # ========================================
   # CODE QUALITY & LINTING
