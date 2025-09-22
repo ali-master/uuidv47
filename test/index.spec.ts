@@ -1,206 +1,40 @@
 import { describe, it, expect } from "vitest";
-import { UUIDVersion } from "../src/constants";
-import { formatUUID, getUUIDVersion, parseUUID } from "../src/uuid";
-import { decodeV4Facade, encodeV4Facade, type UUID128, type UUIDv47Key } from "../src";
+import {
+  encodeV4Facade,
+  decodeV4Facade,
+  batchEncodeV4Facade,
+  batchDecodeV4Facade,
+  generateRandomKey,
+  parseUUID,
+  formatUUID,
+  getUUIDVersion,
+} from "../src";
+import type { UUID128, UUIDv47Key, UUIDOperationOptions } from "../src";
 
-class TestByteOperations {
-  /**
-   * Convert little-endian 8 bytes to uint64
-   */
-  static leBytesToU64(bytes: Buffer): bigint {
-    return (
-      BigInt(bytes[0]) |
-      (BigInt(bytes[1]) << 8n) |
-      (BigInt(bytes[2]) << 16n) |
-      (BigInt(bytes[3]) << 24n) |
-      (BigInt(bytes[4]) << 32n) |
-      (BigInt(bytes[5]) << 40n) |
-      (BigInt(bytes[6]) << 48n) |
-      (BigInt(bytes[7]) << 56n)
-    );
-  }
-
-  /**
-   * Write 48-bit value big-endian
-   */
-  static write48BE(buffer: Buffer, value: bigint): void {
-    const masked = value & 0x0000ffffffffffffn;
-    buffer[0] = Number((masked >> 40n) & 0xffn);
-    buffer[1] = Number((masked >> 32n) & 0xffn);
-    buffer[2] = Number((masked >> 24n) & 0xffn);
-    buffer[3] = Number((masked >> 16n) & 0xffn);
-    buffer[4] = Number((masked >> 8n) & 0xffn);
-    buffer[5] = Number(masked & 0xffn);
-  }
-
-  /**
-   * Read 48-bit value big-endian
-   */
-  static read48BE(buffer: Buffer): bigint {
-    return (
-      (BigInt(buffer[0]) << 40n) |
-      (BigInt(buffer[1]) << 32n) |
-      (BigInt(buffer[2]) << 24n) |
-      (BigInt(buffer[3]) << 16n) |
-      (BigInt(buffer[4]) << 8n) |
-      BigInt(buffer[5])
-    );
-  }
-}
-
-class TestUUIDUtils {
-  /**
-   * Get UUID version
-   */
-  static getVersion(uuid: UUID128): number {
-    return (uuid[6] >> 4) & 0x0f;
-  }
-
-  /**
-   * Set UUID version
-   */
-  static setVersion(uuid: UUID128, version: number): void {
-    uuid[6] = (uuid[6] & 0x0f) | ((version & 0x0f) << 4);
-  }
-
-  /**
-   * Set RFC4122 variant
-   */
-  static setVariantRFC4122(uuid: UUID128): void {
-    uuid[8] = (uuid[8] & 0x3f) | 0x80;
-  }
-
-  /**
-   * Build SipHash input from UUID
-   */
-  static buildSipInputFromV7(uuid: UUID128): Buffer {
-    const message = Buffer.allocUnsafe(10);
-    message[0] = uuid[6] & 0x0f;
-    message[1] = uuid[7];
-    message[2] = uuid[8] & 0x3f;
-    uuid.subarray(9, 16).copy(message, 3);
-    return message;
-  }
-}
-
-/**
- * SipHash implementation for testing
- */
-class TestSipHash {
-  private static rotLeft64(value: bigint, bits: number): bigint {
-    const shift = BigInt(bits);
-    return ((value << shift) | (value >> (64n - shift))) & 0xffffffffffffffffn;
-  }
-
-  static compute(input: Buffer, k0: bigint, k1: bigint): bigint {
-    let v0 = 0x736f6d6570736575n ^ k0;
-    let v1 = 0x646f72616e646f6dn ^ k1;
-    let v2 = 0x6c7967656e657261n ^ k0;
-    let v3 = 0x7465646279746573n ^ k1;
-
-    const inputLength = input.length;
-    let offset = 0;
-
-    // Process full 8-byte blocks
-    while (offset + 8 <= inputLength) {
-      const m = TestByteOperations.leBytesToU64(input.subarray(offset, offset + 8));
-      v3 ^= m;
-
-      // 2 compression rounds
-      for (let i = 0; i < 2; i++) {
-        v0 = (v0 + v1) & 0xffffffffffffffffn;
-        v2 = (v2 + v3) & 0xffffffffffffffffn;
-        v1 = this.rotLeft64(v1, 13);
-        v3 = this.rotLeft64(v3, 16);
-        v1 ^= v0;
-        v3 ^= v2;
-        v0 = this.rotLeft64(v0, 32);
-        v2 = (v2 + v1) & 0xffffffffffffffffn;
-        v0 = (v0 + v3) & 0xffffffffffffffffn;
-        v1 = this.rotLeft64(v1, 17);
-        v3 = this.rotLeft64(v3, 21);
-        v1 ^= v2;
-        v3 ^= v0;
-        v2 = this.rotLeft64(v2, 32);
-      }
-
-      v0 ^= m;
-      offset += 8;
-    }
-
-    // Handle last 0-7 bytes with length encoding
-    let lastBlock = BigInt(inputLength) << 56n;
-    const remaining = inputLength & 7;
-
-    for (let i = 0; i < remaining; i++) {
-      lastBlock |= BigInt(input[offset + i]) << BigInt(i * 8);
-    }
-
-    v3 ^= lastBlock;
-
-    // 2 compression rounds for last block
-    for (let i = 0; i < 2; i++) {
-      v0 = (v0 + v1) & 0xffffffffffffffffn;
-      v2 = (v2 + v3) & 0xffffffffffffffffn;
-      v1 = this.rotLeft64(v1, 13);
-      v3 = this.rotLeft64(v3, 16);
-      v1 ^= v0;
-      v3 ^= v2;
-      v0 = this.rotLeft64(v0, 32);
-      v2 = (v2 + v1) & 0xffffffffffffffffn;
-      v0 = (v0 + v3) & 0xffffffffffffffffn;
-      v1 = this.rotLeft64(v1, 17);
-      v3 = this.rotLeft64(v3, 21);
-      v1 ^= v2;
-      v3 ^= v0;
-      v2 = this.rotLeft64(v2, 32);
-    }
-
-    v0 ^= lastBlock;
-
-    // Finalization: v2 ^= 0xff, then 4 rounds
-    v2 ^= 0xffn;
-    for (let i = 0; i < 4; i++) {
-      v0 = (v0 + v1) & 0xffffffffffffffffn;
-      v2 = (v2 + v3) & 0xffffffffffffffffn;
-      v1 = this.rotLeft64(v1, 13);
-      v3 = this.rotLeft64(v3, 16);
-      v1 ^= v0;
-      v3 ^= v2;
-      v0 = this.rotLeft64(v0, 32);
-      v2 = (v2 + v1) & 0xffffffffffffffffn;
-      v0 = (v0 + v3) & 0xffffffffffffffffn;
-      v1 = this.rotLeft64(v1, 17);
-      v3 = this.rotLeft64(v3, 21);
-      v1 ^= v2;
-      v3 ^= v0;
-      v2 = this.rotLeft64(v2, 32);
-    }
-
-    return v0 ^ v1 ^ v2 ^ v3;
-  }
-}
-
-/**
- * Craft a v7 UUID with specific components
- */
+// Helper function to craft a v7 UUID with specific components
 function craftV7(timestampMs48: bigint, randA12: number, randB62: bigint): UUID128 {
   const uuid = Buffer.alloc(16);
 
-  // Write 48-bit timestamp
-  TestByteOperations.write48BE(uuid, timestampMs48 & 0x0000ffffffffffffn);
+  // Write 48-bit timestamp big-endian
+  const masked = timestampMs48 & 0x0000ffffffffffffn;
+  uuid[0] = Number((masked >> 40n) & 0xffn);
+  uuid[1] = Number((masked >> 32n) & 0xffn);
+  uuid[2] = Number((masked >> 24n) & 0xffn);
+  uuid[3] = Number((masked >> 16n) & 0xffn);
+  uuid[4] = Number((masked >> 8n) & 0xffn);
+  uuid[5] = Number(masked & 0xffn);
 
   // Set version 7
-  TestUUIDUtils.setVersion(uuid, 7);
+  uuid[6] = (uuid[6] & 0x0f) | ((7 & 0x0f) << 4);
 
   // Set rand_a 12 bits
   uuid[6] = (uuid[6] & 0xf0) | ((randA12 >> 8) & 0x0f);
   uuid[7] = randA12 & 0xff;
 
   // Set RFC4122 variant
-  TestUUIDUtils.setVariantRFC4122(uuid);
+  uuid[8] = (uuid[8] & 0x3f) | 0x80;
 
-  // Set rand_b 62 bits (first 6 bits go in byte 8, remaining 56 bits in bytes 9-15)
+  // Set rand_b 62 bits
   uuid[8] = (uuid[8] & 0xc0) | (Number(randB62 >> 56n) & 0x3f);
   for (let i = 0; i < 7; i++) {
     uuid[9 + i] = Number((randB62 >> BigInt(8 * (6 - i))) & 0xffn);
@@ -209,249 +43,247 @@ function craftV7(timestampMs48: bigint, randA12: number, randB62: bigint): UUID1
   return uuid;
 }
 
-describe("48-bit Read/Write Operations", () => {
-  it("should correctly read and write 48-bit values", () => {
-    const buffer = Buffer.alloc(6);
-    const testValue = 0x0123456789abn & 0x0000ffffffffffffn;
+describe("Integration Tests", () => {
+  describe("Real-World Scenarios", () => {
+    it("should handle complex real-world scenarios", () => {
+      const key = generateRandomKey();
+      const timestamp = BigInt(Date.now());
 
-    TestByteOperations.write48BE(buffer, testValue);
-    const readValue = TestByteOperations.read48BE(buffer);
+      // Create multiple UUIDs with different patterns
+      const uuids = Array.from({ length: 100 }, (_, i) =>
+        craftV7(timestamp + BigInt(i), 0x0abc + (i % 16), BigInt(0x456789abcdef + i)),
+      );
 
-    expect(readValue).toBe(testValue);
+      // Test batch operations
+      const encodedUuids = batchEncodeV4Facade(uuids, key);
+      const decodedUuids = batchDecodeV4Facade(encodedUuids, key);
+
+      expect(decodedUuids).toEqual(uuids);
+
+      // Verify all encoded UUIDs are v4
+      encodedUuids.forEach((uuid) => {
+        expect(getUUIDVersion(uuid)).toBe(4);
+      });
+
+      // Verify all decoded UUIDs are v7
+      decodedUuids.forEach((uuid) => {
+        expect(getUUIDVersion(uuid)).toBe(7);
+      });
+    });
+
+    it("should maintain consistency across operations", () => {
+      const key = generateRandomKey();
+      const testUUID = parseUUID("01234567-89ab-7def-8123-456789abcdef");
+
+      // Multiple encode/decode cycles should be consistent
+      let currentUUID = testUUID;
+      for (let i = 0; i < 10; i++) {
+        const encoded = encodeV4Facade(currentUUID, key);
+        const decoded = decodeV4Facade(encoded, key);
+        expect(decoded).toEqual(testUUID);
+        currentUUID = testUUID; // Reset for next iteration
+      }
+    });
+
+    it("should handle mixed UUID operations", () => {
+      const key = generateRandomKey();
+      const v7Uuids = Array.from({ length: 50 }, (_, i) =>
+        craftV7(BigInt(Date.now() + i), 0x123 + i, BigInt(0x456789 + i)),
+      );
+
+      // Mix individual and batch operations
+      const individualEncoded = v7Uuids.slice(0, 10).map((uuid) => encodeV4Facade(uuid, key));
+      const batchEncoded = batchEncodeV4Facade(v7Uuids.slice(10), key);
+
+      const allEncoded = [...individualEncoded, ...batchEncoded];
+
+      // Decode all back
+      const individualDecoded = individualEncoded.map((uuid) => decodeV4Facade(uuid, key));
+      const batchDecoded = batchDecodeV4Facade(batchEncoded, key);
+
+      const allDecoded = [...individualDecoded, ...batchDecoded];
+
+      expect(allDecoded).toEqual(v7Uuids);
+    });
   });
 
-  it("should handle boundary values for 48-bit operations", () => {
-    const buffer = Buffer.alloc(6);
+  describe("Edge Cases and Robustness", () => {
+    it("should handle edge cases gracefully", () => {
+      const key = generateRandomKey();
 
-    // Test zero
-    TestByteOperations.write48BE(buffer, 0n);
-    expect(TestByteOperations.read48BE(buffer)).toBe(0n);
+      // Test with zero values
+      const zeroUuid = craftV7(0n, 0, 0n);
+      const encodedZero = encodeV4Facade(zeroUuid, key);
+      const decodedZero = decodeV4Facade(encodedZero, key);
+      expect(decodedZero).toEqual(zeroUuid);
 
-    // Test maximum 48-bit value
-    const maxValue = 0x0000ffffffffffffn;
-    TestByteOperations.write48BE(buffer, maxValue);
-    expect(TestByteOperations.read48BE(buffer)).toBe(maxValue);
-  });
-});
+      // Test with maximum values
+      const maxUuid = craftV7(0x0000ffffffffffffn, 0x0fff, 0x3fffffffffffffffn);
+      const encodedMax = encodeV4Facade(maxUuid, key);
+      const decodedMax = decodeV4Facade(encodedMax, key);
+      expect(decodedMax).toEqual(maxUuid);
+    });
 
-describe("UUID Parse/Format Roundtrip", () => {
-  it("should parse and format UUID correctly", () => {
-    const testString = "00000000-0000-7000-8000-000000000000";
+    it("should handle various timestamp patterns", () => {
+      const key = generateRandomKey();
+      const timestampPatterns = [
+        0x000000000001n, // Very small
+        0x800000000000n, // High bit set
+        0x7fffffffffffffn, // Just under max
+        0x123456789abcn, // Typical value
+      ];
 
-    const parsed = parseUUID(testString);
-    expect(TestUUIDUtils.getVersion(parsed)).toBe(7);
+      timestampPatterns.forEach((timestamp) => {
+        const uuid = craftV7(timestamp, 0x123, 0x456789abcdefn);
+        const encoded = encodeV4Facade(uuid, key);
+        const decoded = decodeV4Facade(encoded, key);
+        expect(decoded).toEqual(uuid);
+      });
+    });
 
-    const formatted = formatUUID(parsed);
-    const reparsed = parseUUID(formatted);
+    it("should handle different key patterns", () => {
+      const testUuid = craftV7(0x123456789abcn, 0x123, 0x456789abcdefn);
 
-    expect(parsed).toEqual(reparsed);
-  });
+      const keyPatterns = [
+        { k0: 0n, k1: 0n },
+        { k0: 0xffffffffffffffffn, k1: 0xffffffffffffffffn },
+        { k0: 0x5555555555555555n, k1: 0xaaaaaaaaaaaaaaan },
+        { k0: 0x123456789abcdefn, k1: 0xfedcba9876543210n },
+      ];
 
-  it("should reject invalid UUID strings", () => {
-    const invalidUUID = "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz";
-    expect(() => parseUUID(invalidUUID)).toThrow("Invalid hex character in UUID");
-  });
-});
-
-describe("Version and Variant Manipulation", () => {
-  it("should set and get version correctly", () => {
-    const uuid = Buffer.alloc(16);
-
-    TestUUIDUtils.setVersion(uuid, 7);
-    expect(TestUUIDUtils.getVersion(uuid)).toBe(7);
-
-    TestUUIDUtils.setVariantRFC4122(uuid);
-    expect(uuid[8] & 0xc0).toBe(0x80);
-  });
-
-  it("should handle all valid version values", () => {
-    const uuid = Buffer.alloc(16);
-
-    for (let version = 0; version <= 15; version++) {
-      TestUUIDUtils.setVersion(uuid, version);
-      expect(TestUUIDUtils.getVersion(uuid)).toBe(version);
-    }
-  });
-});
-
-describe("SipHash Test Vectors", () => {
-  it("should match known SipHash test vectors", () => {
-    const k0 = 0x0706050403020100n;
-    const k1 = 0x0f0e0d0c0b0a0908n;
-
-    const expectedVectors = [
-      [0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72], // len 0
-      [0xfd, 0x67, 0xdc, 0x93, 0xc5, 0x39, 0xf8, 0x74], // len 1
-      [0x5a, 0x4f, 0xa9, 0xd9, 0x09, 0x80, 0x6c, 0x0d], // len 2
-      [0x2d, 0x7e, 0xfb, 0xd7, 0x96, 0x66, 0x67, 0x85], // len 3
-      [0xb7, 0x87, 0x71, 0x27, 0xe0, 0x94, 0x27, 0xcf], // len 4
-      [0x8d, 0xa6, 0x99, 0xcd, 0x64, 0x55, 0x76, 0x18], // len 5
-      [0xce, 0xe3, 0xfe, 0x58, 0x6e, 0x46, 0xc9, 0xcb], // len 6
-      [0x37, 0xd1, 0x01, 0x8b, 0xf5, 0x00, 0x02, 0xab], // len 7
-      [0x62, 0x24, 0x93, 0x9a, 0x79, 0xf5, 0xf5, 0x93], // len 8
-      [0xb0, 0xe4, 0xa9, 0x0b, 0xdf, 0x82, 0x00, 0x9e], // len 9
-      [0xf3, 0xb9, 0xdd, 0x94, 0xc5, 0xbb, 0x5d, 0x7a], // len 10
-      [0xa7, 0xad, 0x6b, 0x22, 0x46, 0x2f, 0xb3, 0xf4], // len 11
-      [0xfb, 0xe5, 0x0e, 0x86, 0xbc, 0x8f, 0x1e, 0x75], // len 12
-    ];
-
-    // Create message with sequential bytes
-    const message = Buffer.allocUnsafe(64);
-    for (let i = 0; i < 64; i++) {
-      message[i] = i;
-    }
-
-    // Test each length
-    for (let len = 0; len < expectedVectors.length; len++) {
-      const input = message.subarray(0, len);
-      const computed = TestSipHash.compute(input, k0, k1);
-      const expected = TestByteOperations.leBytesToU64(Buffer.from(expectedVectors[len]));
-
-      expect(computed).toBe(expected);
-    }
+      keyPatterns.forEach(({ k0, k1 }) => {
+        const key = { k0, k1 };
+        const encoded = encodeV4Facade(testUuid, key);
+        const decoded = decodeV4Facade(encoded, key);
+        expect(decoded).toEqual(testUuid);
+      });
+    });
   });
 
-  it("should handle additional message lengths", () => {
-    const k0 = 0x0706050403020100n;
-    const k1 = 0x0f0e0d0c0b0a0908n;
-    const message = Buffer.allocUnsafe(64);
-    for (let i = 0; i < 64; i++) {
-      message[i] = i;
-    }
+  describe("Performance Integration", () => {
+    it("should maintain performance characteristics under load", () => {
+      const key = generateRandomKey();
+      const largeDataset = Array.from({ length: 1000 }, (_, i) =>
+        craftV7(BigInt(Date.now() + i), i % 4096, BigInt(0x123456789 + i)),
+      );
 
-    const result = TestSipHash.compute(message.subarray(0, 15), k0, k1);
-    expect(typeof result).toBe("bigint");
-    expect(result).not.toBe(0n);
-  });
-});
+      const startTime = performance.now();
 
-describe("SipHash Input Stability", () => {
-  it("should generate identical SipHash input for v7 and facade", () => {
-    const timestamp = 0x123456789abcn;
-    const randA = 0x0abc;
-    const randB = 0x0123456789abcdefn & ((1n << 62n) - 1n); // Mask to 62 bits
+      // Perform large batch operation
+      const encoded = batchEncodeV4Facade(largeDataset, key);
+      const decoded = batchDecodeV4Facade(encoded, key);
 
-    const originalV7 = craftV7(timestamp, randA, randB);
-    const key: UUIDv47Key = {
-      k0: 0x0123456789abcdefn,
-      k1: 0xfedcba9876543210n,
-    };
+      const endTime = performance.now();
+      const duration = endTime - startTime;
 
-    const facade = encodeV4Facade(originalV7, key);
+      // Verify correctness
+      expect(decoded).toEqual(largeDataset);
 
-    const sipInput1 = TestUUIDUtils.buildSipInputFromV7(originalV7);
-    const sipInput2 = TestUUIDUtils.buildSipInputFromV7(facade);
+      // Should complete within reasonable time (adjust threshold as needed)
+      expect(duration).toBeLessThan(1000); // Less than 1 second for 1000 UUIDs
+    });
 
-    expect(sipInput1).toEqual(sipInput2);
-  });
+    it("should scale efficiently with data size", () => {
+      const key = generateRandomKey();
+      const dataSizes = [10, 50, 100, 200];
+      const timings: number[] = [];
 
-  it("should preserve random bits across transformation", () => {
-    const v7 = craftV7(0x123456789abcn, 0x0abc, 0x0123456789abcdefn & ((1n << 62n) - 1n));
-    const key: UUIDv47Key = { k0: 0x1111n, k1: 0x2222n };
+      dataSizes.forEach((size) => {
+        const dataset = Array.from({ length: size }, (_, i) =>
+          craftV7(BigInt(Date.now() + i), i % 4096, BigInt(0x987654321 + i)),
+        );
 
-    const facade = encodeV4Facade(v7, key);
+        const startTime = performance.now();
+        const encoded = batchEncodeV4Facade(dataset, key);
+        const decoded = batchDecodeV4Facade(encoded, key);
+        const endTime = performance.now();
 
-    // Random bits should be identical
-    expect(facade[6] & 0x0f).toBe(v7[6] & 0x0f);
-    expect(facade[7]).toBe(v7[7]);
-    expect(facade[8] & 0x3f).toBe(v7[8] & 0x3f);
-    expect(facade.subarray(9, 16)).toEqual(v7.subarray(9, 16));
-  });
-});
+        expect(decoded).toEqual(dataset);
+        timings.push(endTime - startTime);
+      });
 
-describe("Encode/Decode Roundtrip", () => {
-  it("should perform perfect roundtrip transformation", () => {
-    const key: UUIDv47Key = {
-      k0: 0x0123456789abcdefn,
-      k1: 0xfedcba9876543210n,
-    };
+      // Performance should scale roughly linearly
+      const timePerOp = timings.map((time, i) => time / dataSizes[i]);
+      const avgTimePerOp = timePerOp.reduce((sum, time) => sum + time, 0) / timePerOp.length;
 
-    // Test with 16 different combinations
-    for (let i = 0; i < 16; i++) {
-      const timestamp = BigInt(0x100000 * i + 123);
-      const randA = (0x0aaa ^ (i * 7)) & 0x0fff;
-      const randB = (0x0123456789abcdefn ^ (0x1111111111111111n * BigInt(i))) & ((1n << 62n) - 1n);
-
-      const originalV7 = craftV7(timestamp, randA, randB);
-
-      // Encode to facade
-      const facade = encodeV4Facade(originalV7, key);
-      expect(TestUUIDUtils.getVersion(facade)).toBe(4);
-      expect(facade[8] & 0xc0).toBe(0x80); // RFC4122 variant
-
-      // Decode back to original
-      const decodedV7 = decodeV4Facade(facade, key);
-      expect(decodedV7).toEqual(originalV7);
-
-      // Test with wrong key - should NOT match
-      const wrongKey: UUIDv47Key = {
-        k0: key.k0 ^ 0xdeadbeefn,
-        k1: key.k1 ^ 0x1337n,
-      };
-
-      const badDecode = decodeV4Facade(facade, wrongKey);
-      expect(badDecode).not.toEqual(originalV7);
-    }
+      // All per-operation times should be within reasonable variance
+      timePerOp.forEach((time) => {
+        expect(time).toBeLessThan(avgTimePerOp * 2);
+      });
+    });
   });
 
-  it("should handle edge cases in roundtrip transformation", () => {
-    const key: UUIDv47Key = { k0: 0x1234n, k1: 0x5678n };
+  describe("Cross-Component Integration", () => {
+    it("should integrate all components seamlessly", () => {
+      // Generate key
+      const key = generateRandomKey();
 
-    // Test with minimum values
-    const minV7 = craftV7(0n, 0, 0n);
-    const minFacade = encodeV4Facade(minV7, key);
-    const minDecoded = decodeV4Facade(minFacade, key);
-    expect(minDecoded).toEqual(minV7);
+      // Parse UUID string
+      const uuidString = "01234567-89ab-7def-8123-456789abcdef";
+      const parsedUuid = parseUUID(uuidString);
 
-    // Test with maximum values
-    const maxTimestamp = 0x0000ffffffffffffn;
-    const maxRandA = 0x0fff;
-    const maxRandB = (1n << 62n) - 1n;
+      // Encode
+      const encoded = encodeV4Facade(parsedUuid, key);
 
-    const maxV7 = craftV7(maxTimestamp, maxRandA, maxRandB);
-    const maxFacade = encodeV4Facade(maxV7, key);
-    const maxDecoded = decodeV4Facade(maxFacade, key);
-    expect(maxDecoded).toEqual(maxV7);
+      // Verify format
+      const encodedString = formatUUID(encoded);
+      expect(encodedString).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      );
+
+      // Decode
+      const decoded = decodeV4Facade(encoded, key);
+
+      // Format back to string
+      const decodedString = formatUUID(decoded);
+      expect(decodedString).toBe(uuidString);
+    });
+
+    it("should handle round-trip string operations", () => {
+      const key = generateRandomKey();
+      const originalStrings = [
+        "00000000-0000-7000-8000-000000000000",
+        "12345678-9abc-7def-8123-456789abcdef",
+        "ffffffff-ffff-7fff-bfff-ffffffffffff",
+      ];
+
+      originalStrings.forEach((original) => {
+        const parsed = parseUUID(original);
+        const encoded = encodeV4Facade(parsed, key);
+        const decoded = decodeV4Facade(encoded, key);
+        const final = formatUUID(decoded);
+
+        expect(final).toBe(original);
+      });
+    });
   });
-});
 
-describe("Implementation Consistency Verification", () => {
-  it("should maintain consistent", () => {
-    const testKey: UUIDv47Key = {
-      k0: 0x0123456789abcdefn,
-      k1: 0xfedcba9876543210n,
-    };
+  describe("Error Propagation and Handling", () => {
+    it("should properly propagate validation errors", () => {
+      const key = generateRandomKey();
+      const invalidV4 = parseUUID("01234567-89ab-4def-8123-456789abcdef"); // v4 instead of v7
 
-    const testV7 = craftV7(0x123456789abcn, 0x0abc, 0x456789abcdefn);
-    const facade = encodeV4Facade(testV7, testKey);
+      expect(() => encodeV4Facade(invalidV4, key)).toThrow("Input UUID must be version 7");
 
-    // Verify structure
-    expect(getUUIDVersion(facade)).toBe(UUIDVersion.V4);
-    expect(facade[8] & 0x80).toBe(0x80); // RFC4122 variant
+      const validV7 = parseUUID("01234567-89ab-7def-8123-456789abcdef");
+      const encoded = encodeV4Facade(validV7, key);
 
-    // Verify roundtrip
-    const decoded = decodeV4Facade(facade, testKey);
-    expect(decoded).toEqual(testV7);
-    expect(getUUIDVersion(decoded)).toBe(UUIDVersion.V7);
-  });
+      // Manually corrupt the version to test decode error
+      const corruptedV7 = Buffer.from(encoded);
+      corruptedV7[6] = (corruptedV7[6] & 0x0f) | (7 << 4); // Set version to 7
 
-  it("should handle all byte value ranges correctly", () => {
-    const key: UUIDv47Key = { k0: 0xaaaan, k1: 0xbbbbn };
+      expect(() => decodeV4Facade(corruptedV7, key)).toThrow("Input UUID must be version 4");
+    });
 
-    // Test with various byte patterns
-    const testPatterns = [
-      { ts: 0x000000000000n, ra: 0x000, rb: 0x0000000000000000n },
-      { ts: 0xffffffffffffn, ra: 0xfff, rb: 0x3fffffffffffffffn },
-      { ts: 0xaaaaaaaaaaaan, ra: 0xaaa, rb: 0x2aaaaaaaaaaaaaaan },
-      { ts: 0x555555555555n, ra: 0x555, rb: 0x1555555555555555n },
-    ];
+    it("should handle batch operation errors gracefully", () => {
+      const key = generateRandomKey();
+      const mixedUuids = [
+        parseUUID("01234567-89ab-7def-8123-456789abcdef"), // Valid v7
+        parseUUID("01234567-89ab-4def-8123-456789abcdef"), // Invalid v4
+      ];
 
-    testPatterns.forEach(({ ts, ra, rb }) => {
-      const v7 = craftV7(ts, ra, rb);
-      const facade = encodeV4Facade(v7, key);
-      const decoded = decodeV4Facade(facade, key);
-
-      expect(decoded).toEqual(v7);
+      // Batch operations should fail on first invalid UUID
+      expect(() => batchEncodeV4Facade(mixedUuids, key)).toThrow();
     });
   });
 });
