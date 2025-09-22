@@ -30,3 +30,6 @@ export const CONSTANTS = {
 } as const;
 
 export const hexChars = "0123456789abcdef";
+
+// Use Set for faster lookup
+export const validHexChars = new Set(hexChars);

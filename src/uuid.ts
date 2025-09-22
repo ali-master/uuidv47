@@ -1,4 +1,4 @@
-import { CONSTANTS, hexChars, UUIDVersion } from "./constants";
+import { CONSTANTS, hexChars, UUIDVersion, validHexChars } from "./constants";
 import type { UUID128 } from "./types";
 
 /**
@@ -54,6 +54,13 @@ function hexValue(char: string): number {
  * Parses UUID string in canonical format (8-4-4-4-12)
  */
 export function parseUUID(uuidString: string): UUID128 {
+  // Preallocate result buffer
+  // Using Buffer.from with Uint8Array to ensure correct typing as UUID128 (Buffer)
+  // Because Buffer.allocUnsafe is not directly assignable to UUID128 type
+  // though it is functionally correct
+  const result = Buffer.from(new Uint8Array(CONSTANTS.UUID_BYTE_LENGTH));
+
+  // Enhanced validation
   if (uuidString.length !== CONSTANTS.UUID_STRING_LENGTH) {
     throw new Error(
       `Invalid UUID string length: expected ${CONSTANTS.UUID_STRING_LENGTH}, got ${uuidString.length}`,
@@ -102,16 +109,16 @@ export function parseUUID(uuidString: string): UUID128 {
     35, // 12 chars
   ];
 
-  const result = Buffer.allocUnsafe(CONSTANTS.UUID_BYTE_LENGTH);
-
   for (let i = 0; i < CONSTANTS.UUID_BYTE_LENGTH; i++) {
-    const highNibble = hexValue(uuidString[hexPositions[i * 2]]);
-    const lowNibble = hexValue(uuidString[hexPositions[i * 2 + 1]]);
+    const highChar = uuidString[hexPositions[i * 2]];
+    const lowChar = uuidString[hexPositions[i * 2 + 1]];
 
-    if (highNibble === -1 || lowNibble === -1) {
-      throw new Error(`Invalid hex character in UUID at position ${i}`);
+    if (!validHexChars.has(highChar) || !validHexChars.has(lowChar)) {
+      throw new Error(`Invalid hex character in UUID at position ${i * 2}`);
     }
 
+    const highNibble = hexValue(highChar);
+    const lowNibble = hexValue(lowChar);
     result[i] = (highNibble << 4) | lowNibble;
   }
 
