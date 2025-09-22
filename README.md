@@ -33,7 +33,6 @@ UUIDv47 is a lightweight library at just 3.75KB (1.17KB gzipped) that provides e
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
 - [Core Concepts](#-core-concepts)
-- [API Reference](#-api-reference)
 - [Usage Examples](#-usage-examples)
 - [Performance](#-performance)
 - [Security](#-security-best-practices)
