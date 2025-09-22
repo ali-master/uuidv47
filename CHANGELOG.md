@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.0](https://github.com/ali-master/uuidv47/compare/1.0.0...1.1.0) (2025-09-22)
+
+### Features
+
+* add comprehensive tests for byte operations, constants, and UUIDs ([e822246](https://github.com/ali-master/uuidv47/commit/e822246f8322ab3f78a06ccd3abaf38aeb3c7269))
+* add size-limit configuration and update dependencies ([ab2ae76](https://github.com/ali-master/uuidv47/commit/ab2ae76f7e1b496c6e7c18ee78382794791c343d))
+* enhance UUID and key management benchmarks ([b14aca3](https://github.com/ali-master/uuidv47/commit/b14aca3fa3c60039d657eb2fa0fe8d9f479d9168))
+* **examples:** refactor UUIDv47 operations to use direct imports ([b245b6c](https://github.com/ali-master/uuidv47/commit/b245b6c5a8298fe63efcff7ac6cb438947881ec5))
+* optimize UUID operations and improve performance ([d2998e8](https://github.com/ali-master/uuidv47/commit/d2998e8a34de7a14f414e4ba53670e5ab18630fb))
+* update README with new bundle sizes and API reference section ([efcfba2](https://github.com/ali-master/uuidv47/commit/efcfba22e53947f944c28582757f20e07ebd8081))
+
+### Bug Fixes
+
+* **README:** remove API Reference section ([39c8950](https://github.com/ali-master/uuidv47/commit/39c895075a3fdc0281437c0fab1d8fc3d7f730b7))
+
+### Chores
+
+* remove unused main.ts ([8ea01dd](https://github.com/ali-master/uuidv47/commit/8ea01dd60e0e3a3b79da8217d7809259954e4797))
+
 ## [1.0.0](https://github.com/ali-master/uuidv47/compare/0.2.0...1.0.0) (2025-09-22)
 
 ### ⚠ BREAKING CHANGES
