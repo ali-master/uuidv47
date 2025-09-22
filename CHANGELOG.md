@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0](https://github.com/ali-master/uuidv47/compare/0.2.0...1.0.0) (2025-09-22)
+
+### ⚠ BREAKING CHANGES
+
+* replace UUIDv47 method calls with direct imports for less bundle size
+
+### Features
+
+* update project title in README for clarity ([3f857c3](https://github.com/ali-master/uuidv47/commit/3f857c3b9110e72a4484ed5c38686997548e4e18))
+* **UUID:** preallocate result buffer using Buffer.from for security reason and correct typing as UUID128 ([89fea5a](https://github.com/ali-master/uuidv47/commit/89fea5adc5a1915052a2de838fb3e17e85fdf481))
+
+### Bug Fixes
+
+* **README:** update gzipped size to reflect accurate bundle size ([a097128](https://github.com/ali-master/uuidv47/commit/a0971287fca48763eed2415b0c1dafdd902e890a))
+
+### Code Refactoring
+
+* replace UUIDv47 method calls with direct imports for less bundle size ([f0b3000](https://github.com/ali-master/uuidv47/commit/f0b3000c6ef4e8ce5b007028b98a191989097750))
+
 ## [0.2.0](https://github.com/ali-master/uuidv47/compare/0.1.0...0.2.0) (2025-09-18)
 
 ### Features
