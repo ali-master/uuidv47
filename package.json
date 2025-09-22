@@ -48,8 +48,9 @@
     "dev": "bunup --watch",
     "clean": "bunx rimraf dist",
     "clean:all": "bunx rimraf dist node_modules",
+    "test": "CI=true vitest && bun run test:types && bun run test:size",
     "test:types": "tsc --noEmit",
-    "test": "CI=true vitest",
+    "test:size": "size-limit",
     "test:junit": "bun run test --reporter=junit --outputFile=test-report.junit.xml",
     "test:watch": "bun run test --watch",
     "test:ui": "bun run test --ui --coverage.enabled=true",
@@ -70,6 +71,7 @@
   "dependencies": {},
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.1",
+    "@size-limit/file": "^11.2.0",
     "@types/node": "^24.5.2",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
@@ -77,6 +79,7 @@
     "cross-env": "^10.0.0",
     "prettier": "^3.6.2",
     "release-it": "^19.0.5",
+    "size-limit": "^11.2.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },

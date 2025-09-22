@@ -1,0 +1,9 @@
+[
+  {
+    "name": "uuidv47",
+    "path": ["dist/index.js", "dist/index.d.ts"],
+    "limit": "10.13 kB",
+    "brotli": false,
+    "gzip": false
+  }
+]
