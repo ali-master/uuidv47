@@ -505,6 +505,16 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **UUID Standards**: RFC 4122 and RFC 9562
 - **TypeScript Community**: For excellent tooling and ecosystem
 
+## Star History
+
+<a href="https://www.star-history.com/#ali-master/uuidv47&Date&LogScale">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ali-master/uuidv47&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ali-master/uuidv47&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ali-master/uuidv47&type=Date" />
+ </picture>
+</a>
+
 ---
 
 <div align="center">
