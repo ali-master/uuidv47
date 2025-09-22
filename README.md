@@ -8,9 +8,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Test Coverage](https://img.shields.io/badge/coverage-80%2B-brightgreen?style=flat-square)](https://github.com/ali-master/uuidv47)
 [![Bundle Size](https://img.shields.io/badge/bundle-3.75KB-brightgreen?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
-[![Minified + Gzipped](https://img.shields.io/badge/gzipped-1.68KB-success?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
+[![Minified + Gzipped](https://img.shields.io/badge/gzipped-1.17KB-success?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
 
-<p><em>⚡ Ultra-lightweight • 🚀 Zero dependencies • 📦 Just 1.68KB gzipped</em></p>
+<p><em>⚡ Ultra-lightweight • 🚀 Zero dependencies • 📦 Just 1.17KB gzipped</em></p>
 </div>
 
 ## 🚀 What is UUIDv47?
@@ -22,11 +22,11 @@
 - 🔐 **Cryptographically secure** transformations using SipHash-2-4 algorithm
 - ⚡ **High performance** with >10,000 operations per second
 - 🔄 **Perfect reversibility** - no data loss in transformations
-- 📦 **Tiny footprint** - only 1.68KB gzipped with zero dependencies
+- 📦 **Tiny footprint** - only 1.17KB gzipped with zero dependencies
 
 ## 🎯 Why Choose UUIDv47?
 
-UUIDv47 is a lightweight library at just 3.75KB (1.68KB gzipped) that provides enterprise-grade UUID transformation capabilities with zero dependencies.
+UUIDv47 is a lightweight library at just 3.75KB (1.17KB gzipped) that provides enterprise-grade UUID transformation capabilities with zero dependencies.
 
 ## 📋 Table of Contents
 
