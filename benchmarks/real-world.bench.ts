@@ -2,6 +2,7 @@ import { describe, bench } from "vitest";
 import { createKeyFromBuffer, generateRandomKey, type UUIDv47Key } from "../src";
 import { formatUUID, parseUUID } from "../src/uuid";
 import { decodeV4Facade, encodeV4Facade } from "../src/core";
+import { randomFillSync } from "node:crypto";
 
 describe("UUIDv47 Real-World Usage Patterns", () => {
   // Simulate a service with persistent key (from examples)
@@ -70,7 +71,7 @@ describe("UUIDv47 Real-World Usage Patterns", () => {
   // Setup tenant keys
   tenantIds.forEach((tenantId) => {
     const keyBuffer = Buffer.alloc(16);
-    require("crypto").randomFillSync(keyBuffer);
+    randomFillSync(keyBuffer);
     multiTenantService.setTenantKey(tenantId, keyBuffer);
   });
 
