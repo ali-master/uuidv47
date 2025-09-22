@@ -1,124 +1,98 @@
-import { CONSTANTS, hexChars, UUIDVersion, validHexChars } from "./constants";
-import type { UUID128 } from "./types";
+import {
+  CONSTANTS,
+  hexChars,
+  hexToValue,
+  DASH_POSITIONS,
+  HEX_POSITIONS,
+  UUID_SECTIONS,
+  UUIDVersion,
+} from "./constants";
+import { allocateUUIDBuffer } from "./byte-operations";
+import type { UUID128, UUIDOperationOptions, UUIDParseResult } from "./types";
 
 /**
- * Gets the version of a UUID
+ * UUID version extraction using bit operations
  */
 export function getUUIDVersion(uuid: UUID128): UUIDVersion {
   return (uuid[6] >> CONSTANTS.VERSION_SHIFT) & CONSTANTS.VERSION_MASK;
 }
 
 /**
- * Sets the version of a UUID
+ * Optimized UUID version setting with minimal operations
  */
 export function setUUIDVersion(uuid: UUID128, version: UUIDVersion): void {
   uuid[6] =
-    (uuid[6] & CONSTANTS.VERSION_MASK) |
-    ((version & CONSTANTS.VERSION_MASK) << CONSTANTS.VERSION_SHIFT);
+    (uuid[6] & ~(CONSTANTS.VERSION_MASK << CONSTANTS.VERSION_SHIFT)) |
+    (version << CONSTANTS.VERSION_SHIFT);
 }
 
 /**
- * Sets RFC4122 variant bits
+ * Optimized RFC4122 variant setting
  */
 export function setVariantRFC4122(uuid: UUID128): void {
   uuid[8] = (uuid[8] & CONSTANTS.VARIANT_MASK_CLEAR) | CONSTANTS.VARIANT_RFC4122;
 }
 
 /**
- * Builds SipHash input from v7 UUID's random bits
+ * SipHash input builder with minimal allocations
  */
 export function buildSipHashInput(uuid: UUID128): Buffer {
+  // Pre-allocate buffer for maximum performance
   const message = Buffer.allocUnsafe(CONSTANTS.SIPHASH_MESSAGE_LENGTH);
 
-  // Extract random bits: [low-nibble of b6][b7][b8&0x3F][b9..b15]
+  // Optimized bit extraction with single operations
   message[0] = uuid[6] & CONSTANTS.VERSION_MASK;
   message[1] = uuid[7];
   message[2] = uuid[8] & CONSTANTS.VARIANT_MASK_CLEAR;
-  uuid.subarray(9, 16).copy(message, 3);
+
+  // Use fast native copy for remaining bytes
+  uuid.copy(message, 3, 9, 16);
 
   return message;
 }
 
 /**
- * Validates hex character and returns its value
+ * hex character validation and conversion
  */
-function hexValue(char: string): number {
-  const code = char.charCodeAt(0);
-  if (code >= 48 && code <= 57) return code - 48; // 0-9
-  if (code >= 97 && code <= 102) return code - 87; // a-f
-  if (code >= 65 && code <= 70) return code - 55; // A-F
-  return -1;
+function fastHexValue(charCode: number): number {
+  const value = hexToValue[charCode];
+  return value === 255 ? -1 : value;
 }
 
 /**
- * Parses UUID string in canonical format (8-4-4-4-12)
+ * UUID parser with optimized validation
  */
 export function parseUUID(uuidString: string): UUID128 {
-  // Preallocate result buffer
-  // Using Buffer.from with Uint8Array to ensure correct typing as UUID128 (Buffer)
-  // Because Buffer.allocUnsafe is not directly assignable to UUID128 type
-  // though it is functionally correct
-  const result = Buffer.from(new Uint8Array(CONSTANTS.UUID_BYTE_LENGTH));
-
-  // Enhanced validation
+  // Fast length check
   if (uuidString.length !== CONSTANTS.UUID_STRING_LENGTH) {
     throw new Error(
       `Invalid UUID string length: expected ${CONSTANTS.UUID_STRING_LENGTH}, got ${uuidString.length}`,
     );
   }
 
-  const dashPositions = [8, 13, 18, 23];
-  for (const pos of dashPositions) {
-    if (uuidString[pos] !== "-") {
+  // Pre-allocate result buffer for maximum performance
+  const result = allocateUUIDBuffer();
+
+  // Optimized dash validation using pre-computed positions
+  for (const pos of DASH_POSITIONS) {
+    if (uuidString.charCodeAt(pos) !== 45) {
+      // 45 is '-' character code
       throw new Error(`Invalid UUID format: missing dash at position ${pos}`);
     }
   }
 
-  const hexPositions = [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7, // 8 chars
-    9,
-    10,
-    11,
-    12, // 4 chars
-    14,
-    15,
-    16,
-    17, // 4 chars
-    19,
-    20,
-    21,
-    22, // 4 chars
-    24,
-    25,
-    26,
-    27,
-    28,
-    29,
-    30,
-    31,
-    32,
-    33,
-    34,
-    35, // 12 chars
-  ];
-
+  // hex parsing using lookup table and pre-computed positions
   for (let i = 0; i < CONSTANTS.UUID_BYTE_LENGTH; i++) {
-    const highChar = uuidString[hexPositions[i * 2]];
-    const lowChar = uuidString[hexPositions[i * 2 + 1]];
+    const highCharCode = uuidString.charCodeAt(HEX_POSITIONS[i * 2]);
+    const lowCharCode = uuidString.charCodeAt(HEX_POSITIONS[i * 2 + 1]);
 
-    if (!validHexChars.has(highChar) || !validHexChars.has(lowChar)) {
+    const highNibble = fastHexValue(highCharCode);
+    const lowNibble = fastHexValue(lowCharCode);
+
+    if (highNibble === -1 || lowNibble === -1) {
       throw new Error(`Invalid hex character in UUID at position ${i * 2}`);
     }
 
-    const highNibble = hexValue(highChar);
-    const lowNibble = hexValue(lowChar);
     result[i] = (highNibble << 4) | lowNibble;
   }
 
@@ -126,24 +100,106 @@ export function parseUUID(uuidString: string): UUID128 {
 }
 
 /**
- * Formats UUID as canonical string (8-4-4-4-12)
+ * UUID formatter with pre-computed layout
  */
 export function formatUUID(uuid: UUID128): string {
-  const result: string[] = [];
-
+  // Pre-allocate string array for maximum performance
+  const result: string[] = new Array(36);
+  let resultIndex = 0;
   let byteIndex = 0;
-  const sections = [4, 2, 2, 2, 6]; // byte counts for each section
 
-  for (let sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
+  // Process each section with pre-computed lengths
+  for (let sectionIndex = 0; sectionIndex < UUID_SECTIONS.length; sectionIndex++) {
+    // Add dash separator (except for first section)
     if (sectionIndex > 0) {
-      result.push("-");
+      result[resultIndex++] = "-";
     }
 
-    for (let i = 0; i < sections[sectionIndex]; i++) {
+    // Process bytes in current section
+    const sectionLength = UUID_SECTIONS[sectionIndex];
+    for (let i = 0; i < sectionLength; i++) {
       const byte = uuid[byteIndex++];
-      result.push(hexChars[byte >> 4], hexChars[byte & 0xf]);
+      result[resultIndex++] = hexChars[byte >> 4];
+      result[resultIndex++] = hexChars[byte & 0xf];
     }
   }
 
   return result.join("");
+}
+
+/**
+ * UUID parser with performance options
+ */
+export function parseUUIDWithOptions(
+  uuidString: string,
+  options?: UUIDOperationOptions,
+): UUIDParseResult {
+  const skipValidation = options?.skipValidation ?? false;
+
+  try {
+    if (!skipValidation) {
+      // Fast length check
+      if (uuidString.length !== CONSTANTS.UUID_STRING_LENGTH) {
+        return {
+          uuid: allocateUUIDBuffer(),
+          version: 0,
+          isValid: false,
+        };
+      }
+
+      // Optimized dash validation using pre-computed positions
+      for (const pos of DASH_POSITIONS) {
+        if (uuidString.charCodeAt(pos) !== 45) {
+          return {
+            uuid: allocateUUIDBuffer(),
+            version: 0,
+            isValid: false,
+          };
+        }
+      }
+    }
+
+    const uuid = parseUUID(uuidString);
+    const version = getUUIDVersion(uuid);
+
+    return {
+      uuid,
+      version,
+      isValid: true,
+    };
+  } catch {
+    return {
+      uuid: allocateUUIDBuffer(),
+      version: 0,
+      isValid: false,
+    };
+  }
+}
+
+/**
+ * Validate UUID string format without full parsing
+ */
+export function isValidUUIDString(uuidString: string): boolean {
+  if (uuidString.length !== CONSTANTS.UUID_STRING_LENGTH) {
+    return false;
+  }
+
+  // Check dashes at correct positions
+  for (const pos of DASH_POSITIONS) {
+    if (uuidString.charCodeAt(pos) !== 45) {
+      return false;
+    }
+  }
+
+  // Check hex characters at all other positions
+  for (let i = 0; i < CONSTANTS.UUID_BYTE_LENGTH; i++) {
+    const highCharCode = uuidString.charCodeAt(HEX_POSITIONS[i * 2]);
+    const lowCharCode = uuidString.charCodeAt(HEX_POSITIONS[i * 2 + 1]);
+
+    if (fastHexValue(highCharCode) === -1 || fastHexValue(lowCharCode) === -1) {
+      return false;
+    }
+  }
+
+  return true;
 }

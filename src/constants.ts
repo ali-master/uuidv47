@@ -29,7 +29,86 @@ export const CONSTANTS = {
   },
 } as const;
 
+// Pre-computed hex character arrays and lookup tables
 export const hexChars = "0123456789abcdef";
 
-// Use Set for faster lookup
-export const validHexChars = new Set(hexChars);
+// hex lookup tables - O(1) character to value conversion
+export const hexToValue = new Uint8Array(256);
+export const validHexChars = new Set<string>();
+
+// Initialize hex lookup table once at module load
+for (let i = 0; i < 256; i++) {
+  hexToValue[i] = 255; // Invalid marker
+}
+
+// Populate valid hex characters and their values
+for (let i = 0; i < 16; i++) {
+  const char = hexChars[i];
+  const code = char.charCodeAt(0);
+  validHexChars.add(char);
+  validHexChars.add(char.toUpperCase());
+  hexToValue[code] = i;
+  hexToValue[code - 32] = i; // Handle uppercase (A-F)
+}
+
+// Pre-computed dash positions for UUID parsing
+export const DASH_POSITIONS = new Set([8, 13, 18, 23]);
+
+// Pre-computed hex positions for faster UUID parsing
+export const HEX_POSITIONS = [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7, // 8 chars
+  9,
+  10,
+  11,
+  12, // 4 chars
+  14,
+  15,
+  16,
+  17, // 4 chars
+  19,
+  20,
+  21,
+  22, // 4 chars
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35, // 12 chars
+] as const;
+
+// Section lengths for UUID formatting
+export const UUID_SECTIONS = [4, 2, 2, 2, 6] as const;
+
+// Pre-computed bigint constants for bit operations
+export const BIGINT_MASKS = {
+  BYTE: 0xffn,
+  WORD: 0xffffn,
+  DWORD: 0xffffffffn,
+  QWORD: 0xffffffffffffffffn,
+  ROTATION_64: 64n,
+} as const;
+
+// Pre-computed shift amounts
+export const SHIFT_AMOUNTS = {
+  BITS_8: 8n,
+  BITS_16: 16n,
+  BITS_24: 24n,
+  BITS_32: 32n,
+  BITS_40: 40n,
+  BITS_48: 48n,
+  BITS_56: 56n,
+} as const;
