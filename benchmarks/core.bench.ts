@@ -1,5 +1,6 @@
 import { describe, bench } from "vitest";
-import { UUIDv47, type UUIDv47Key } from "../src";
+import { type UUIDv47Key } from "../src";
+import { decodeV4Facade, encodeV4Facade } from "../src/core";
 
 describe("UUIDv47 Core Operations", () => {
   // Pre-generate test data for consistent benchmarking
@@ -22,12 +23,12 @@ describe("UUIDv47 Core Operations", () => {
     return v7UUID;
   });
 
-  const testV4Facades = testV7UUIDs.map((uuid) => UUIDv47.encodeV4Facade(uuid, testKey));
+  const testV4Facades = testV7UUIDs.map((uuid) => encodeV4Facade(uuid, testKey));
 
   bench(
     "encodeV4Facade - single UUID",
     () => {
-      UUIDv47.encodeV4Facade(testV7UUIDs[0], testKey);
+      encodeV4Facade(testV7UUIDs[0], testKey);
     },
     {
       iterations: 50_000,
@@ -37,7 +38,7 @@ describe("UUIDv47 Core Operations", () => {
   bench(
     "decodeV4Facade - single UUID",
     () => {
-      UUIDv47.decodeV4Facade(testV4Facades[0], testKey);
+      decodeV4Facade(testV4Facades[0], testKey);
     },
     {
       iterations: 50_000,
@@ -48,7 +49,7 @@ describe("UUIDv47 Core Operations", () => {
     "encodeV4Facade - batch 100 UUIDs",
     () => {
       for (let i = 0; i < 100; i++) {
-        UUIDv47.encodeV4Facade(testV7UUIDs[i], testKey);
+        encodeV4Facade(testV7UUIDs[i], testKey);
       }
     },
     {
@@ -60,7 +61,7 @@ describe("UUIDv47 Core Operations", () => {
     "decodeV4Facade - batch 100 UUIDs",
     () => {
       for (let i = 0; i < 100; i++) {
-        UUIDv47.decodeV4Facade(testV4Facades[i], testKey);
+        decodeV4Facade(testV4Facades[i], testKey);
       }
     },
     {
@@ -71,8 +72,8 @@ describe("UUIDv47 Core Operations", () => {
   bench(
     "roundtrip transformation - encode + decode",
     () => {
-      const facade = UUIDv47.encodeV4Facade(testV7UUIDs[0], testKey);
-      UUIDv47.decodeV4Facade(facade, testKey);
+      const facade = encodeV4Facade(testV7UUIDs[0], testKey);
+      decodeV4Facade(facade, testKey);
     },
     {
       iterations: 25_000,

@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { UUIDv47, UUIDVersion, type UUID128, type UUIDv47Key } from "../src";
+import { UUIDVersion } from "../src/constants";
+import { formatUUID, getUUIDVersion, parseUUID } from "../src/uuid";
+import { decodeV4Facade, encodeV4Facade, type UUID128, type UUIDv47Key } from "../src";
 
 class TestByteOperations {
   /**
@@ -236,18 +238,18 @@ describe("UUID Parse/Format Roundtrip", () => {
   it("should parse and format UUID correctly", () => {
     const testString = "00000000-0000-7000-8000-000000000000";
 
-    const parsed = UUIDv47.parseUUID(testString);
+    const parsed = parseUUID(testString);
     expect(TestUUIDUtils.getVersion(parsed)).toBe(7);
 
-    const formatted = UUIDv47.formatUUID(parsed);
-    const reparsed = UUIDv47.parseUUID(formatted);
+    const formatted = formatUUID(parsed);
+    const reparsed = parseUUID(formatted);
 
     expect(parsed).toEqual(reparsed);
   });
 
   it("should reject invalid UUID strings", () => {
     const invalidUUID = "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz";
-    expect(() => UUIDv47.parseUUID(invalidUUID)).toThrow("Invalid hex character in UUID");
+    expect(() => parseUUID(invalidUUID)).toThrow("Invalid hex character in UUID");
   });
 });
 
@@ -335,7 +337,7 @@ describe("SipHash Input Stability", () => {
       k1: 0xfedcba9876543210n,
     };
 
-    const facade = UUIDv47.encodeV4Facade(originalV7, key);
+    const facade = encodeV4Facade(originalV7, key);
 
     const sipInput1 = TestUUIDUtils.buildSipInputFromV7(originalV7);
     const sipInput2 = TestUUIDUtils.buildSipInputFromV7(facade);
@@ -347,7 +349,7 @@ describe("SipHash Input Stability", () => {
     const v7 = craftV7(0x123456789abcn, 0x0abc, 0x0123456789abcdefn & ((1n << 62n) - 1n));
     const key: UUIDv47Key = { k0: 0x1111n, k1: 0x2222n };
 
-    const facade = UUIDv47.encodeV4Facade(v7, key);
+    const facade = encodeV4Facade(v7, key);
 
     // Random bits should be identical
     expect(facade[6] & 0x0f).toBe(v7[6] & 0x0f);
@@ -373,12 +375,12 @@ describe("Encode/Decode Roundtrip", () => {
       const originalV7 = craftV7(timestamp, randA, randB);
 
       // Encode to facade
-      const facade = UUIDv47.encodeV4Facade(originalV7, key);
+      const facade = encodeV4Facade(originalV7, key);
       expect(TestUUIDUtils.getVersion(facade)).toBe(4);
       expect(facade[8] & 0xc0).toBe(0x80); // RFC4122 variant
 
       // Decode back to original
-      const decodedV7 = UUIDv47.decodeV4Facade(facade, key);
+      const decodedV7 = decodeV4Facade(facade, key);
       expect(decodedV7).toEqual(originalV7);
 
       // Test with wrong key - should NOT match
@@ -387,7 +389,7 @@ describe("Encode/Decode Roundtrip", () => {
         k1: key.k1 ^ 0x1337n,
       };
 
-      const badDecode = UUIDv47.decodeV4Facade(facade, wrongKey);
+      const badDecode = decodeV4Facade(facade, wrongKey);
       expect(badDecode).not.toEqual(originalV7);
     }
   });
@@ -397,8 +399,8 @@ describe("Encode/Decode Roundtrip", () => {
 
     // Test with minimum values
     const minV7 = craftV7(0n, 0, 0n);
-    const minFacade = UUIDv47.encodeV4Facade(minV7, key);
-    const minDecoded = UUIDv47.decodeV4Facade(minFacade, key);
+    const minFacade = encodeV4Facade(minV7, key);
+    const minDecoded = decodeV4Facade(minFacade, key);
     expect(minDecoded).toEqual(minV7);
 
     // Test with maximum values
@@ -407,8 +409,8 @@ describe("Encode/Decode Roundtrip", () => {
     const maxRandB = (1n << 62n) - 1n;
 
     const maxV7 = craftV7(maxTimestamp, maxRandA, maxRandB);
-    const maxFacade = UUIDv47.encodeV4Facade(maxV7, key);
-    const maxDecoded = UUIDv47.decodeV4Facade(maxFacade, key);
+    const maxFacade = encodeV4Facade(maxV7, key);
+    const maxDecoded = decodeV4Facade(maxFacade, key);
     expect(maxDecoded).toEqual(maxV7);
   });
 });
@@ -421,16 +423,16 @@ describe("Implementation Consistency Verification", () => {
     };
 
     const testV7 = craftV7(0x123456789abcn, 0x0abc, 0x456789abcdefn);
-    const facade = UUIDv47.encodeV4Facade(testV7, testKey);
+    const facade = encodeV4Facade(testV7, testKey);
 
     // Verify structure
-    expect(UUIDv47.getUUIDVersion(facade)).toBe(UUIDVersion.V4);
+    expect(getUUIDVersion(facade)).toBe(UUIDVersion.V4);
     expect(facade[8] & 0x80).toBe(0x80); // RFC4122 variant
 
     // Verify roundtrip
-    const decoded = UUIDv47.decodeV4Facade(facade, testKey);
+    const decoded = decodeV4Facade(facade, testKey);
     expect(decoded).toEqual(testV7);
-    expect(UUIDv47.getUUIDVersion(decoded)).toBe(UUIDVersion.V7);
+    expect(getUUIDVersion(decoded)).toBe(UUIDVersion.V7);
   });
 
   it("should handle all byte value ranges correctly", () => {
@@ -444,10 +446,10 @@ describe("Implementation Consistency Verification", () => {
       { ts: 0x555555555555n, ra: 0x555, rb: 0x1555555555555555n },
     ];
 
-    testPatterns.forEach(({ ts, ra, rb }, index) => {
+    testPatterns.forEach(({ ts, ra, rb }) => {
       const v7 = craftV7(ts, ra, rb);
-      const facade = UUIDv47.encodeV4Facade(v7, key);
-      const decoded = UUIDv47.decodeV4Facade(facade, key);
+      const facade = encodeV4Facade(v7, key);
+      const decoded = decodeV4Facade(facade, key);
 
       expect(decoded).toEqual(v7);
     });

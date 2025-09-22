@@ -65,22 +65,22 @@ pnpm add @usex/uuidv47
 ## ⚡ Quick Start
 
 ```typescript
-import { UUIDv47 } from '@usex/uuidv47';
+import { generateRandomKey, parseUUID, formatUUID, encodeV4Facade, decodeV4Facade } from '@usex/uuidv47';
 
 // 1. Generate a secure transformation key
-const key = UUIDv47.generateRandomKey();
+const key = generateRandomKey();
 
 // 2. Parse your UUIDv7 (from your UUID generator)
-const originalV7 = UUIDv47.parseUUID('018f4e7c-3c4a-7000-8000-123456789abc');
+const originalV7 = parseUUID('018f4e7c-3c4a-7000-8000-123456789abc');
 
 // 3. Transform to v4 facade (for external APIs)
-const v4Facade = UUIDv47.encodeV4Facade(originalV7, key);
-console.log(UUIDv47.formatUUID(v4Facade));
+const v4Facade = encodeV4Facade(originalV7, key);
+console.log(formatUUID(v4Facade));
 // Output: "a1b2c3d4-e5f6-4789-9abc-def012345678" (appears random)
 
 // 4. Transform back to original v7 (for internal use)
-const decodedV7 = UUIDv47.decodeV4Facade(v4Facade, key);
-console.log(UUIDv47.formatUUID(decodedV7));
+const decodedV7 = decodeV4Facade(v4Facade, key);
+console.log(formatUUID(decodedV7));
 // Output: "018f4e7c-3c4a-7000-8000-123456789abc" (original restored)
 ```
 
@@ -114,84 +114,25 @@ const publicId = "a1b2c3d4-e5f6-4789-9abc-def012345678";   // Hides creation tim
 - **Transformation Key**: 128-bit key (two 64-bit values) for secure transformations
 - **UUID128**: Buffer representation of 16-byte UUIDs for efficient processing
 
-## 📚 API Reference
-
-### Main Class: `UUIDv47`
-
-#### Core Transformation Methods
-
-```typescript
-// Transform UUIDv7 to UUIDv4 facade
-static encodeV4Facade(uuidV7: UUID128, key: UUIDv47Key): UUID128
-
-// Transform UUIDv4 facade back to UUIDv7
-static decodeV4Facade(uuidV4Facade: UUID128, key: UUIDv47Key): UUID128
-```
-
-#### Key Management Methods
-
-```typescript
-// Generate cryptographically secure random key
-static generateRandomKey(): UUIDv47Key
-
-// Create key from two 64-bit bigint values
-static createKey(k0: bigint, k1: bigint): UUIDv47Key
-
-// Create key from 16-byte buffer (for loading from storage)
-static createKeyFromBuffer(keyBuffer: Buffer): UUIDv47Key
-```
-
-#### UUID Utility Methods
-
-```typescript
-// Parse UUID string to Buffer
-static parseUUID(uuidString: string): UUID128
-
-// Format UUID Buffer to string
-static formatUUID(uuid: UUID128): string
-
-// Get UUID version (4 or 7)
-static getUUIDVersion(uuid: UUID128): UUIDVersion
-```
-
-### Type Definitions
-
-```typescript
-// 128-bit UUID as Buffer
-type UUID128 = Buffer;
-
-// SipHash key structure
-interface UUIDv47Key {
-  readonly k0: bigint;  // First 64-bit key component
-  readonly k1: bigint;  // Second 64-bit key component
-}
-
-// UUID version enumeration
-enum UUIDVersion {
-  V4 = 4,
-  V7 = 7
-}
-```
-
 ## 💡 Usage Examples
 
 ### 1. Basic Encode/Decode Operations
 
 ```typescript
-import { UUIDv47 } from '@usex/uuidv47';
+import { generateRandomKey, parseUUID, formatUUID, getUUIDVersion, encodeV4Facade, decodeV4Facade } from '@usex/uuidv47';
 
-const key = UUIDv47.generateRandomKey();
-const v7UUID = UUIDv47.parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
+const key = generateRandomKey();
+const v7UUID = parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
 
-console.log(`Original UUIDv7: ${UUIDv47.formatUUID(v7UUID)}`);
-console.log(`Version: ${UUIDv47.getUUIDVersion(v7UUID)}`); // 7
+console.log(`Original UUIDv7: ${formatUUID(v7UUID)}`);
+console.log(`Version: ${getUUIDVersion(v7UUID)}`); // 7
 
-const v4Facade = UUIDv47.encodeV4Facade(v7UUID, key);
-console.log(`UUIDv4 Facade: ${UUIDv47.formatUUID(v4Facade)}`);
-console.log(`Version: ${UUIDv47.getUUIDVersion(v4Facade)}`); // 4
+const v4Facade = encodeV4Facade(v7UUID, key);
+console.log(`UUIDv4 Facade: ${formatUUID(v4Facade)}`);
+console.log(`Version: ${getUUIDVersion(v4Facade)}`); // 4
 
-const decodedV7 = UUIDv47.decodeV4Facade(v4Facade, key);
-console.log(`Decoded UUIDv7: ${UUIDv47.formatUUID(decodedV7)}`);
+const decodedV7 = decodeV4Facade(v4Facade, key);
+console.log(`Decoded UUIDv7: ${formatUUID(decodedV7)}`);
 console.log(`Matches original: ${decodedV7.equals(v7UUID)}`); // true
 ```
 
@@ -203,22 +144,22 @@ class UUIDTransformationService {
 
   constructor(keyMaterial?: Buffer) {
     this.key = keyMaterial 
-      ? UUIDv47.createKeyFromBuffer(keyMaterial)
-      : UUIDv47.generateRandomKey();
+      ? createKeyFromBuffer(keyMaterial)
+      : generateRandomKey();
   }
 
   // For external APIs - hide time ordering
   toPublicId(internalV7: string): string {
-    const uuid = UUIDv47.parseUUID(internalV7);
-    const facade = UUIDv47.encodeV4Facade(uuid, this.key);
-    return UUIDv47.formatUUID(facade);
+    const uuid = parseUUID(internalV7);
+    const facade = encodeV4Facade(uuid, this.key);
+    return formatUUID(facade);
   }
 
   // For internal processing - restore time ordering
   toInternalId(publicV4: string): string {
-    const uuid = UUIDv47.parseUUID(publicV4);
-    const original = UUIDv47.decodeV4Facade(uuid, this.key);
-    return UUIDv47.formatUUID(original);
+    const uuid = parseUUID(publicV4);
+    const original = decodeV4Facade(uuid, this.key);
+    return formatUUID(original);
   }
 }
 
@@ -243,25 +184,25 @@ class MultiTenantUUIDService {
   private readonly tenantKeys = new Map<string, UUIDv47Key>();
 
   setTenantKey(tenantId: string, keyMaterial: Buffer): void {
-    this.tenantKeys.set(tenantId, UUIDv47.createKeyFromBuffer(keyMaterial));
+    this.tenantKeys.set(tenantId, createKeyFromBuffer(keyMaterial));
   }
 
   encodeForTenant(tenantId: string, v7UUID: string): string {
     const key = this.tenantKeys.get(tenantId);
     if (!key) throw new Error(`No key found for tenant: ${tenantId}`);
     
-    const uuid = UUIDv47.parseUUID(v7UUID);
-    const facade = UUIDv47.encodeV4Facade(uuid, key);
-    return UUIDv47.formatUUID(facade);
+    const uuid = parseUUID(v7UUID);
+    const facade = encodeV4Facade(uuid, key);
+    return formatUUID(facade);
   }
 
   decodeForTenant(tenantId: string, v4Facade: string): string {
     const key = this.tenantKeys.get(tenantId);
     if (!key) throw new Error(`No key found for tenant: ${tenantId}`);
     
-    const uuid = UUIDv47.parseUUID(v4Facade);
-    const original = UUIDv47.decodeV4Facade(uuid, key);
-    return UUIDv47.formatUUID(original);
+    const uuid = parseUUID(v4Facade);
+    const original = decodeV4Facade(uuid, key);
+    return formatUUID(original);
   }
 }
 ```
@@ -270,15 +211,15 @@ class MultiTenantUUIDService {
 
 ```typescript
 // Process 1000 UUIDs efficiently
-const key = UUIDv47.generateRandomKey();
+const key = generateRandomKey();
 const v7UUIDs = generateV7UUIDs(1000); // Your UUID generation
 
 console.time('Batch Encode');
-const facades = v7UUIDs.map(uuid => UUIDv47.encodeV4Facade(uuid, key));
+const facades = v7UUIDs.map(uuid => encodeV4Facade(uuid, key));
 console.timeEnd('Batch Encode'); // ~10ms for 1000 UUIDs
 
 console.time('Batch Decode');
-const decoded = facades.map(facade => UUIDv47.decodeV4Facade(facade, key));
+const decoded = facades.map(facade => decodeV4Facade(facade, key));
 console.timeEnd('Batch Decode'); // ~10ms for 1000 UUIDs
 
 // Verify all transformations are perfect
@@ -289,27 +230,27 @@ console.log(`All roundtrips successful: ${allMatch}`); // true
 ### 5. Error Handling
 
 ```typescript
-const key = UUIDv47.generateRandomKey();
+const key = generateRandomKey();
 
 try {
   // This will throw - can only encode v7 UUIDs
-  const v4UUID = UUIDv47.parseUUID("a1b2c3d4-e5f6-4000-8000-123456789abc");
-  UUIDv47.encodeV4Facade(v4UUID, key);
+  const v4UUID = parseUUID("a1b2c3d4-e5f6-4000-8000-123456789abc");
+  encodeV4Facade(v4UUID, key);
 } catch (error) {
   console.log(error.message); // "Input UUID must be version 7"
 }
 
 try {
   // This will throw - can only decode v4 UUIDs
-  const v7UUID = UUIDv47.parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
-  UUIDv47.decodeV4Facade(v7UUID, key);
+  const v7UUID = parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
+  decodeV4Facade(v7UUID, key);
 } catch (error) {
   console.log(error.message); // "Input UUID must be version 4"
 }
 
 try {
   // This will throw - invalid UUID format
-  UUIDv47.parseUUID("invalid-uuid-string");
+  parseUUID("invalid-uuid-string");
 } catch (error) {
   console.log(error.message); // "Invalid UUID string length: expected 36, got 19"
 }

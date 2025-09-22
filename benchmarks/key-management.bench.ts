@@ -1,5 +1,5 @@
 import { describe, bench } from "vitest";
-import { UUIDv47 } from "../src";
+import { createKey, createKeyFromBuffer, generateRandomKey } from "../src";
 
 describe("UUIDv47 Key Management", () => {
   // Pre-generated test data
@@ -17,7 +17,7 @@ describe("UUIDv47 Key Management", () => {
   bench(
     "generateRandomKey - single key",
     () => {
-      UUIDv47.generateRandomKey();
+      generateRandomKey();
     },
     {
       iterations: 10_000,
@@ -28,7 +28,7 @@ describe("UUIDv47 Key Management", () => {
     "generateRandomKey - batch 100 keys",
     () => {
       for (let i = 0; i < 100; i++) {
-        UUIDv47.generateRandomKey();
+        generateRandomKey();
       }
     },
     {
@@ -40,7 +40,7 @@ describe("UUIDv47 Key Management", () => {
     "createKey from bigints",
     () => {
       const pair = testBigIntPairs[0];
-      UUIDv47.createKey(pair.k0, pair.k1);
+      createKey(pair.k0, pair.k1);
     },
     {
       iterations: 100_000,
@@ -50,7 +50,7 @@ describe("UUIDv47 Key Management", () => {
   bench(
     "createKeyFromBuffer",
     () => {
-      UUIDv47.createKeyFromBuffer(testKeyBuffers[0]);
+      createKeyFromBuffer(testKeyBuffers[0]);
     },
     {
       iterations: 50_000,
@@ -61,7 +61,7 @@ describe("UUIDv47 Key Management", () => {
     "createKeyFromBuffer - batch 100 keys",
     () => {
       for (let i = 0; i < 100; i++) {
-        UUIDv47.createKeyFromBuffer(testKeyBuffers[i]);
+        createKeyFromBuffer(testKeyBuffers[i]);
       }
     },
     {
@@ -75,9 +75,9 @@ describe("UUIDv47 Key Management", () => {
       // Simulate choosing between random generation and buffer creation
       const useRandom = Math.random() > 0.5;
       if (useRandom) {
-        UUIDv47.generateRandomKey();
+        generateRandomKey();
       } else {
-        UUIDv47.createKeyFromBuffer(testKeyBuffers[0]);
+        createKeyFromBuffer(testKeyBuffers[0]);
       }
     },
     {

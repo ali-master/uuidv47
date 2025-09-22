@@ -1,5 +1,5 @@
 import { describe, bench } from "vitest";
-import { UUIDv47 } from "../src";
+import { formatUUID, getUUIDVersion, parseUUID } from "../src/uuid";
 
 describe("UUIDv47 Parse and Format Operations", () => {
   // Pre-generated test data
@@ -18,13 +18,13 @@ describe("UUIDv47 Parse and Format Operations", () => {
     return `${timestamp.substring(0, 8)}-${timestamp.substring(8, 12)}-7${random.substring(0, 3)}-8${random.substring(3, 6)}-${random.substring(6, 12)}${Math.random().toString(16).substring(2, 8)}`;
   });
 
-  const testUUIDBuffers = testUUIDStrings.map((str) => UUIDv47.parseUUID(str));
-  const batchUUIDBuffers = batchUUIDStrings.map((str) => UUIDv47.parseUUID(str));
+  const testUUIDBuffers = testUUIDStrings.map((str) => parseUUID(str));
+  const batchUUIDBuffers = batchUUIDStrings.map((str) => parseUUID(str));
 
   bench(
     "parseUUID - single UUID string",
     () => {
-      UUIDv47.parseUUID(testUUIDStrings[0]);
+      parseUUID(testUUIDStrings[0]);
     },
     {
       iterations: 100_000,
@@ -34,7 +34,7 @@ describe("UUIDv47 Parse and Format Operations", () => {
   bench(
     "formatUUID - single UUID buffer",
     () => {
-      UUIDv47.formatUUID(testUUIDBuffers[0]);
+      formatUUID(testUUIDBuffers[0]);
     },
     {
       iterations: 100_000,
@@ -45,7 +45,7 @@ describe("UUIDv47 Parse and Format Operations", () => {
     "parseUUID - batch 100 UUID strings",
     () => {
       for (let i = 0; i < 100; i++) {
-        UUIDv47.parseUUID(batchUUIDStrings[i]);
+        parseUUID(batchUUIDStrings[i]);
       }
     },
     {
@@ -57,7 +57,7 @@ describe("UUIDv47 Parse and Format Operations", () => {
     "formatUUID - batch 100 UUID buffers",
     () => {
       for (let i = 0; i < 100; i++) {
-        UUIDv47.formatUUID(batchUUIDBuffers[i]);
+        formatUUID(batchUUIDBuffers[i]);
       }
     },
     {
@@ -68,8 +68,8 @@ describe("UUIDv47 Parse and Format Operations", () => {
   bench(
     "parse-format roundtrip - single UUID",
     () => {
-      const parsed = UUIDv47.parseUUID(testUUIDStrings[0]);
-      UUIDv47.formatUUID(parsed);
+      const parsed = parseUUID(testUUIDStrings[0]);
+      formatUUID(parsed);
     },
     {
       iterations: 50_000,
@@ -79,7 +79,7 @@ describe("UUIDv47 Parse and Format Operations", () => {
   bench(
     "getUUIDVersion - single UUID",
     () => {
-      UUIDv47.getUUIDVersion(testUUIDBuffers[0]);
+      getUUIDVersion(testUUIDBuffers[0]);
     },
     {
       iterations: 1_000_000,
@@ -90,7 +90,7 @@ describe("UUIDv47 Parse and Format Operations", () => {
     "getUUIDVersion - batch 100 UUIDs",
     () => {
       for (let i = 0; i < 100; i++) {
-        UUIDv47.getUUIDVersion(batchUUIDBuffers[i]);
+        getUUIDVersion(batchUUIDBuffers[i]);
       }
     },
     {
@@ -101,8 +101,8 @@ describe("UUIDv47 Parse and Format Operations", () => {
   bench(
     "UUID validation workflow - parse + version check",
     () => {
-      const parsed = UUIDv47.parseUUID(testUUIDStrings[0]);
-      const version = UUIDv47.getUUIDVersion(parsed);
+      const parsed = parseUUID(testUUIDStrings[0]);
+      const version = getUUIDVersion(parsed);
       // Simulate version validation
       version === 7;
     },

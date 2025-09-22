@@ -1,4 +1,5 @@
-import { CONSTANTS, type UUIDv47Key } from "./index";
+import { CONSTANTS } from "./constants";
+import { type UUIDv47Key } from "./types";
 import { readUInt64LE, rotateLeft64 } from "./byte-operations";
 
 /**

@@ -1,5 +1,7 @@
 import { describe, bench } from "vitest";
-import { UUIDv47, type UUIDv47Key } from "../src";
+import { createKeyFromBuffer, generateRandomKey, type UUIDv47Key } from "../src";
+import { formatUUID, parseUUID } from "../src/uuid";
+import { decodeV4Facade, encodeV4Facade } from "../src/core";
 
 describe("UUIDv47 Real-World Usage Patterns", () => {
   // Simulate a service with persistent key (from examples)
@@ -8,22 +10,22 @@ describe("UUIDv47 Real-World Usage Patterns", () => {
 
     constructor(keyMaterial?: Buffer) {
       if (keyMaterial) {
-        this.key = UUIDv47.createKeyFromBuffer(keyMaterial);
+        this.key = createKeyFromBuffer(keyMaterial);
       } else {
-        this.key = UUIDv47.generateRandomKey();
+        this.key = generateRandomKey();
       }
     }
 
     transformToPublic(internalV7: string): string {
-      const uuid = UUIDv47.parseUUID(internalV7);
-      const facade = UUIDv47.encodeV4Facade(uuid, this.key);
-      return UUIDv47.formatUUID(facade);
+      const uuid = parseUUID(internalV7);
+      const facade = encodeV4Facade(uuid, this.key);
+      return formatUUID(facade);
     }
 
     transformFromPublic(publicV4: string): string {
-      const uuid = UUIDv47.parseUUID(publicV4);
-      const original = UUIDv47.decodeV4Facade(uuid, this.key);
-      return UUIDv47.formatUUID(original);
+      const uuid = parseUUID(publicV4);
+      const original = decodeV4Facade(uuid, this.key);
+      return formatUUID(original);
     }
   }
 
@@ -32,25 +34,25 @@ describe("UUIDv47 Real-World Usage Patterns", () => {
     private readonly tenantKeys = new Map<string, UUIDv47Key>();
 
     setTenantKey(tenantId: string, keyMaterial: Buffer): void {
-      this.tenantKeys.set(tenantId, UUIDv47.createKeyFromBuffer(keyMaterial));
+      this.tenantKeys.set(tenantId, createKeyFromBuffer(keyMaterial));
     }
 
     encodeForTenant(tenantId: string, v7UUID: string): string {
       const key = this.tenantKeys.get(tenantId);
       if (!key) throw new Error(`No key found for tenant: ${tenantId}`);
 
-      const uuid = UUIDv47.parseUUID(v7UUID);
-      const facade = UUIDv47.encodeV4Facade(uuid, key);
-      return UUIDv47.formatUUID(facade);
+      const uuid = parseUUID(v7UUID);
+      const facade = encodeV4Facade(uuid, key);
+      return formatUUID(facade);
     }
 
     decodeForTenant(tenantId: string, v4Facade: string): string {
       const key = this.tenantKeys.get(tenantId);
       if (!key) throw new Error(`No key found for tenant: ${tenantId}`);
 
-      const uuid = UUIDv47.parseUUID(v4Facade);
-      const original = UUIDv47.decodeV4Facade(uuid, key);
-      return UUIDv47.formatUUID(original);
+      const uuid = parseUUID(v4Facade);
+      const original = decodeV4Facade(uuid, key);
+      return formatUUID(original);
     }
   }
 
