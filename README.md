@@ -7,10 +7,10 @@
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Test Coverage](https://img.shields.io/badge/coverage-80%2B-brightgreen?style=flat-square)](https://github.com/ali-master/uuidv47)
-[![Bundle Size](https://img.shields.io/badge/bundle-3.75KB-brightgreen?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
-[![Minified + Gzipped](https://img.shields.io/badge/gzipped-1.17KB-success?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
+[![Bundle Size](https://img.shields.io/badge/bundle-5.71KB-brightgreen?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
+[![Minified + Gzipped](https://img.shields.io/badge/gzipped-2.25KB-success?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
 
-<p><em>⚡ Ultra-lightweight • 🚀 Zero dependencies • 📦 Just 1.17KB gzipped</em></p>
+<p><em>⚡ Ultra-lightweight • 🚀 Zero dependencies • 📦 Just 2.25KB gzipped</em></p>
 </div>
 
 ## 🚀 What is UUIDv47?
@@ -22,11 +22,11 @@
 - 🔐 **Cryptographically secure** transformations using SipHash-2-4 algorithm
 - ⚡ **High performance** with >10,000 operations per second
 - 🔄 **Perfect reversibility** - no data loss in transformations
-- 📦 **Tiny footprint** - only 1.17KB gzipped with zero dependencies
+- 📦 **Tiny footprint** - only 2.25KB gzipped with zero dependencies
 
 ## 🎯 Why Choose UUIDv47?
 
-UUIDv47 is a lightweight library at just 3.75KB (1.17KB gzipped) that provides enterprise-grade UUID transformation capabilities with zero dependencies.
+UUIDv47 is a lightweight library at just 5.71KB (2.25KB gzipped) that provides enterprise-grade UUID transformation capabilities with zero dependencies.
 
 ## 📋 Table of Contents
 
@@ -34,9 +34,9 @@ UUIDv47 is a lightweight library at just 3.75KB (1.17KB gzipped) that provides e
 - [Quick Start](#-quick-start)
 - [Core Concepts](#-core-concepts)
 - [Usage Examples](#-usage-examples)
+- [API Reference](#-api-reference)
 - [Performance](#-performance)
-- [Security](#-security-best-practices)
-- [Testing](#-testing)
+- [Security](#-se)
 - [Contributing](#-contributing)
 
 ## 📦 Installation
@@ -255,195 +255,238 @@ try {
 }
 ```
 
-## ⚡ Performance
+## 📚 API Reference
 
-UUIDv47 is optimized for production use with exceptional performance characteristics based on comprehensive benchmarking:
+### Core Transformation Functions
 
-### Core Operations Benchmarks
+#### `encodeV4Facade(uuidV7: UUID128, key: UUIDv47Key): UUID128`
+Transform a UUIDv7 into a UUIDv4 facade that appears random but can be reversed.
 
-| Operation | Performance | Notes |
-|-----------|-------------|-------|
-| **Encode v7→v4** | **~149,000 ops/sec** | Single UUID transformation |
-| **Decode v4→v7** | **~150,000 ops/sec** | Single UUID transformation |
-| **Roundtrip (encode+decode)** | **~75,000 ops/sec** | Full transformation cycle |
-| **Batch Encode (100 UUIDs)** | **~1,500 ops/sec** | Batch processing throughput |
-| **Batch Decode (100 UUIDs)** | **~1,500 ops/sec** | Batch processing throughput |
+```typescript
+import { encodeV4Facade, parseUUID, generateRandomKey } from '@usex/uuidv47';
 
-### Key Management Performance
-
-| Operation | Performance | Notes |
-|-----------|-------------|-------|
-| **Create from BigInts** | **~16.4M ops/sec** | Ultra-fast key creation |
-| **Create from Buffer** | **~10M ops/sec** | Buffer-based key creation |
-| **Generate Random Key** | **~685,000 ops/sec** | Cryptographically secure |
-| **Batch Key Generation (100)** | **~7,300 ops/sec** | Bulk key operations |
-
-### String/Buffer Operations
-
-| Operation | Performance | Notes |
-|-----------|-------------|-------|
-| **Parse UUID String** | **~5.7M ops/sec** | String to Buffer conversion |
-| **Format UUID Buffer** | **~2.7M ops/sec** | Buffer to String conversion |
-| **Get UUID Version** | **~16.6M ops/sec** | Version extraction |
-| **Parse-Format Roundtrip** | **~2M ops/sec** | Full string processing cycle |
-| **UUID Validation Workflow** | **~5.5M ops/sec** | Parse + version check |
-
-### Real-World Usage Patterns
-
-| Scenario | Performance | Notes |
-|----------|-------------|-------|
-| **Service Pattern (Public)** | **~137,000 ops/sec** | Single transformation to public ID |
-| **Service Pattern (Internal)** | **~69,000 ops/sec** | Single transformation from public ID |
-| **Multi-Tenant Encode** | **~140,500 ops/sec** | Single tenant transformation |
-| **Multi-Tenant (5 tenants)** | **~27,800 ops/sec** | Round-robin across tenants |
-| **API Response (10 IDs)** | **~13,700 ops/sec** | Batch ID hiding simulation |
-| **Security Validation** | **~56,900 ops/sec** | Key isolation verification |
-
-### Memory Usage
-
-- **Zero allocations** during transformations (reuses input buffers when possible)
-- **16 bytes** per UUID128 (native Buffer)
-- **16 bytes** per UUIDv47Key (two bigints)
-- **Minimal overhead** - direct memory operations
-
-### Performance Characteristics
-
-- **Consistent Performance**: Sub-millisecond latency for single operations
-- **Scalable Batching**: Efficient batch processing for high-throughput scenarios  
-- **Memory Efficient**: Direct buffer operations without unnecessary allocations
-- **CPU Optimized**: BigInt arithmetic optimized for 64-bit operations
-- **Cache Friendly**: Lookup tables and inlined operations for critical paths
-
-### Optimization Features
-
-- **BigInt arithmetic** for 64-bit operations
-- **Buffer reuse** where possible
-- **Lookup tables** for hex conversion
-- **Inlined operations** for critical paths
-- **TypeScript optimizations** compiled to efficient JavaScript
-- **SipHash-2-4** optimized implementation with minimal overhead
-
-### Benchmark Environment
-
-- **Runtime**: Bun/Node.js on modern CPU
-- **Iterations**: 50K-100K+ per test for statistical significance
-- **Methodology**: Vitest benchmark framework with multiple runs
-- **Hardware**: Results may vary based on hardware configuration
-
-## 🔐 Security Best Practices
-
-> **⚠️ Critical**: Proper key management is essential for security. Follow these guidelines to ensure safe implementation.
-
-### 🔑 Key Management
-
-- 🏛️ **Secure Storage**: Store keys in Hardware Security Modules (HSM), key vaults, or encrypted storage
-- 🏢 **Environment Isolation**: Use different keys per tenant/environment to prevent cross-contamination  
-- 🔄 **Key Rotation**: Implement periodic key rotation with proper migration strategies
-- 📝 **Logging Policy**: Never log or transmit keys in plaintext - treat them as sensitive credentials
-
-### ✅ Validation & Processing
-
-- 🔍 **Version Validation**: Always validate UUID versions before processing to prevent attacks
-- 🧬 **Key Derivation**: Consider using key derivation functions from master secrets for scalability
-
-### 🛡️ Additional Security Measures
-
-- 🔐 **Access Control**: Implement strict access controls for key management operations
-- 📊 **Audit Logging**: Log all key usage and UUID transformation operations for security monitoring
-- 🔒 **Transport Security**: Use TLS/HTTPS for all communications involving UUIDs or keys
-- 🧪 **Testing**: Regularly test your key rotation and recovery procedures
-
-### Security Properties
-
-- **SipHash-2-4**: Cryptographically secure PRF resistant to timing attacks
-- **Key Isolation**: Different keys produce completely different facades for the same UUID
-- **Tamper Detection**: Any modification to facade results in different decoded UUID
-- **Forward Security**: Compromising current key doesn't affect past transformations with different keys
-
-## 🧪 Testing
-
-The library includes comprehensive test coverage with >80% code coverage:
-
-```bash
-# Run all tests
-bun test
-
-# Run with coverage report
-bun run test:coverage
-
-# Watch mode for development
-bun run test:watch
-
-# UI mode with coverage
-bun run test:ui
+const key = generateRandomKey();
+const v7 = parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
+const v4Facade = encodeV4Facade(v7, key);
 ```
 
-### Test Categories
+#### `decodeV4Facade(uuidV4Facade: UUID128, key: UUIDv47Key): UUID128`
+Transform a UUIDv4 facade back to its original UUIDv7 format.
 
-- **Unit Tests**: All public methods and edge cases
-- **Integration Tests**: Real-world usage patterns
-- **Security Tests**: Key isolation and tamper detection
-- **Performance Tests**: Benchmark critical operations
-- **Compatibility Tests**: Cross-platform validation
+```typescript
+import { decodeV4Facade } from '@usex/uuidv47';
 
-### Sample Test Output
-
-```bash
-✓ Basic encode/decode operations (50 tests)
-✓ Key management and validation (25 tests) 
-✓ Error handling and edge cases (30 tests)
-✓ Security and isolation tests (20 tests)
-✓ Performance benchmarks (10 tests)
-
-Coverage: 85.2% (lines), 90.1% (functions), 82.7% (branches)
+const originalV7 = decodeV4Facade(v4Facade, key);
 ```
 
-## 🔧 Development Setup
+#### Enhanced Core Functions with Options
 
-```bash
-# Clone repository
-git clone https://github.com/ali-master/uuidv47.git
-cd uuidv47
+#### `encodeV4FacadeWithOptions(uuidV7: UUID128, key: UUIDv47Key, options?: UUIDOperationOptions): UUID128`
+Encode with performance optimization options.
 
-# Install dependencies (Bun recommended)
-bun install
+```typescript
+import { encodeV4FacadeWithOptions } from '@usex/uuidv47';
 
-# Run development build
-bun run dev
-
-# Run tests
-bun run test
-
-# Run benchmarks
-bun run test:bench
-
-# Build for production
-bun run build
+// Skip validation for trusted input (faster)
+const encoded = encodeV4FacadeWithOptions(v7, key, { skipValidation: true });
 ```
 
-## 🤝 Contributing
+#### `decodeV4FacadeWithOptions(uuidV4Facade: UUID128, key: UUIDv47Key, options?: UUIDOperationOptions): UUID128`
+Decode with performance optimization options.
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+```typescript
+import { decodeV4FacadeWithOptions } from '@usex/uuidv47';
 
-### Development Workflow
+// Skip validation for maximum performance
+const decoded = decodeV4FacadeWithOptions(v4Facade, key, { skipValidation: true });
+```
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Make** your changes with tests
-4. **Ensure** all tests pass (`bun test`)
-5. **Commit** your changes (`git commit -m 'feat: Add amazing feature'`)
-6. **Push** to the branch (`git push origin feature/amazing-feature`)
-7. **Open** a Pull Request
+### Batch Processing Functions
 
-## 📄 License
+#### `batchEncodeV4Facade(uuids: UUID128[], key: UUIDv47Key): UUID128[]`
+Process multiple UUIDs efficiently in a single operation.
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+```typescript
+import { batchEncodeV4Facade } from '@usex/uuidv47';
+
+const v7UUIDs = [uuid1, uuid2, uuid3]; // Array of v7 UUIDs
+const v4Facades = batchEncodeV4Facade(v7UUIDs, key);
+```
+
+#### `batchDecodeV4Facade(uuids: UUID128[], key: UUIDv47Key): UUID128[]`
+Decode multiple UUIDs efficiently in a single operation.
+
+```typescript
+import { batchDecodeV4Facade } from '@usex/uuidv47';
+
+const originalUUIDs = batchDecodeV4Facade(v4Facades, key);
+```
+
+#### `batchEncodeV4FacadeWithOptions(uuids: UUID128[], key: UUIDv47Key, options?: UUIDOperationOptions): UUID128[]`
+Batch encoding with performance options.
+
+```typescript
+import { batchEncodeV4FacadeWithOptions } from '@usex/uuidv47';
+
+// Use individual processing instead of batch optimization
+const encoded = batchEncodeV4FacadeWithOptions(uuids, key, { 
+  useBatchProcessing: false,
+  skipValidation: true 
+});
+```
+
+#### `batchDecodeV4FacadeWithOptions(uuids: UUID128[], key: UUIDv47Key, options?: UUIDOperationOptions): UUID128[]`
+Batch decoding with performance options.
+
+```typescript
+import { batchDecodeV4FacadeWithOptions } from '@usex/uuidv47';
+
+const decoded = batchDecodeV4FacadeWithOptions(facades, key, {
+  useBatchProcessing: false,
+  skipValidation: true
+});
+```
+
+### UUID Parsing and Formatting Functions
+
+#### `parseUUID(uuidString: string): UUID128`
+Convert a UUID string to internal Buffer representation.
+
+```typescript
+import { parseUUID } from '@usex/uuidv47';
+
+const uuid = parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
+```
+
+#### `formatUUID(uuid: UUID128): string`
+Convert a UUID Buffer to standard string format.
+
+```typescript
+import { formatUUID } from '@usex/uuidv47';
+
+const uuidString = formatUUID(uuid); // "018f4e7c-3c4a-7000-8000-123456789abc"
+```
+
+#### `parseUUIDWithOptions(uuidString: string, options?: UUIDOperationOptions): UUIDParseResult`
+Parse UUID with enhanced result information and performance options.
+
+```typescript
+import { parseUUIDWithOptions } from '@usex/uuidv47';
+
+const result = parseUUIDWithOptions("018f4e7c-3c4a-7000-8000-123456789abc");
+console.log(result);
+// {
+//   uuid: Buffer,
+//   version: 7,
+//   isValid: true
+// }
+
+// Skip validation for performance
+const fastResult = parseUUIDWithOptions(uuidString, { skipValidation: true });
+```
+
+#### `isValidUUIDString(uuidString: string): boolean`
+Fast validation of UUID string format without full parsing.
+
+```typescript
+import { isValidUUIDString } from '@usex/uuidv47';
+
+const isValid = isValidUUIDString("018f4e7c-3c4a-7000-8000-123456789abc"); // true
+const isInvalid = isValidUUIDString("invalid-uuid"); // false
+```
+
+### UUID Version and Variant Functions
+
+#### `getUUIDVersion(uuid: UUID128): UUIDVersion`
+Extract the version number from a UUID.
+
+```typescript
+import { getUUIDVersion } from '@usex/uuidv47';
+
+const version = getUUIDVersion(uuid); // 7 for UUIDv7, 4 for UUIDv4
+```
+
+#### `setUUIDVersion(uuid: UUID128, version: UUIDVersion): void`
+Set the version bits in a UUID (modifies the UUID in place).
+
+```typescript
+import { setUUIDVersion, UUIDVersion } from '@usex/uuidv47';
+
+setUUIDVersion(uuid, UUIDVersion.V4); // Sets version to 4
+```
+
+#### `setVariantRFC4122(uuid: UUID128): void`
+Set the RFC4122 variant bits in a UUID (modifies the UUID in place).
+
+```typescript
+import { setVariantRFC4122 } from '@usex/uuidv47';
+
+setVariantRFC4122(uuid); // Sets proper variant bits
+```
+
+### Key Management Functions
+
+#### `generateRandomKey(): UUIDv47Key`
+Generate a cryptographically secure random transformation key.
+
+```typescript
+import { generateRandomKey } from '@usex/uuidv47';
+
+const key = generateRandomKey();
+```
+
+#### `createKey(k0: bigint, k1: bigint): UUIDv47Key`
+Create a transformation key from two 64-bit values.
+
+```typescript
+import { createKey } from '@usex/uuidv47';
+
+const key = createKey(0x0123456789abcdefn, 0xfedcba9876543210n);
+```
+
+#### `createKeyFromBuffer(keyBuffer: Buffer): UUIDv47Key`
+Create a transformation key from a 16-byte buffer.
+
+```typescript
+import { createKeyFromBuffer } from '@usex/uuidv47';
+
+const keyBuffer = Buffer.from('0123456789abcdeffedcba9876543210', 'hex');
+const key = createKeyFromBuffer(keyBuffer);
+```
+
+#### `keyToBuffer(key: UUIDv47Key): Buffer`
+Convert a transformation key to a 16-byte buffer for serialization.
+
+```typescript
+import { keyToBuffer } from '@usex/uuidv47';
+
+const buffer = keyToBuffer(key); // 16-byte Buffer
+```
+
+#### `isValidKey(key: any): key is UUIDv47Key`
+Type guard to validate if an object is a valid UUIDv47Key.
+
+```typescript
+import { isValidKey } from '@usex/uuidv47';
+
+if (isValidKey(someObject)) {
+  // TypeScript now knows someObject is UUIDv47Key
+  const encoded = encodeV4Facade(uuid, someObject);
+}
+```
+
+#### `generateRandomKeys(count: number): UUIDv47Key[]`
+Generate multiple random keys efficiently in a single operation.
+
+```typescript
+import { generateRandomKeys } from '@usex/uuidv47';
+
+const keys = generateRandomKeys(10); // Array of 10 random keys
+```
 
 ## 🙏 Acknowledgments
-
 - **SipHash Algorithm**: Jean-Philippe Aumasson and Daniel J. Bernstein
 - **UUID Standards**: RFC 4122 and RFC 9562
-- **TypeScript Community**: For excellent tooling and ecosystem
 
 ## Star History
 
