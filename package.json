@@ -48,7 +48,7 @@
     "dev": "bunup --watch",
     "clean": "bunx rimraf dist",
     "clean:all": "bunx rimraf dist node_modules",
-    "test": "CI=true vitest && bun run test:types && bun run test:size",
+    "test": "bun run test:types && bun run test:size && CI=true vitest",
     "test:types": "tsc --noEmit",
     "test:size": "size-limit",
     "test:junit": "bun run test --reporter=junit --outputFile=test-report.junit.xml",
