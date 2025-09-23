@@ -386,6 +386,7 @@ jobs:
           name: codecov-${{ matrix.os }}-${{ matrix.runtime }}
           fail_ci_if_error: false
           verbose: true
+          slug: ali-master/uuidv47
 
   # ========================================
   # SUMMARY & NOTIFICATIONS
