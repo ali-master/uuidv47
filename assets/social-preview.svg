@@ -71,7 +71,7 @@
   <g transform="matrix(1, 0, 0, 1, 100, 92.530121)">
     <text font-family="'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif" font-size="96" font-weight="900" fill="url(#holo-text)" filter="url(#cyber-glow)" style="white-space: pre;">UUIDv47</text>
     <text y="120" font-family="'SF Mono', Monaco, monospace" font-size="32" font-weight="500" fill="#4ECDC4" opacity="0.9" style="white-space: pre;">
-      <tspan>Quantum UUID Transformation</tspan>
+      <tspan>UUID Transformation</tspan>
       <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
     </text>
     <text y="165" font-family="'SF Mono', Monaco, monospace" font-size="24" font-weight="400" fill="#96CEB4" opacity="0.8" style="white-space: pre;">SipHash-2-4 Cryptographic Engine • TypeScript</text>
