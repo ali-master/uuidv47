@@ -8,6 +8,7 @@ import {
   generateRandomKey,
   getUUIDVersion,
   parseUUID,
+  extractTimestampFromV7,
 } from "../src";
 import { randomFillSync } from "node:crypto";
 
@@ -333,7 +334,101 @@ class UUIDv47Examples {
   }
 
   /**
-   * Example 6: Security Considerations
+   * Example 6: UUID v7 Timestamp Extraction
+   */
+  static timestampExtractionExample(): void {
+    console.log(colorize.header("=== UUID v7 Timestamp Extraction ==="));
+
+    // Example 1: Extract timestamp from a parsed UUID v7
+    const v7UuidString = "018f4e7c-3c4a-7000-8000-123456789abc";
+    const v7UUID = parseUUID(v7UuidString);
+    const extractedDate = extractTimestampFromV7(v7UUID);
+
+    console.log(colorize.success("Extract timestamp from UUID v7:"));
+    console.log(`  ${colorize.label("UUID v7:")}       ${colorize.uuid(v7UuidString)}`);
+    console.log(
+      `  ${colorize.label("Timestamp:")}     ${colorize.number(extractedDate.getTime().toString())} ms`,
+    );
+    console.log(
+      `  ${colorize.label("Date (ISO):")}    ${colorize.value(extractedDate.toISOString())}`,
+    );
+    console.log(
+      `  ${colorize.label("Date (Local):")}  ${colorize.value(extractedDate.toLocaleString())}`,
+    );
+
+    // Example 2: Create a UUID v7 with current timestamp
+    const currentTimestamp = Date.now();
+    const timestampBuffer = Buffer.alloc(6);
+    timestampBuffer.writeUIntBE(currentTimestamp, 0, 6);
+
+    const randomBytes = Buffer.alloc(10);
+    randomFillSync(randomBytes);
+
+    const currentV7UUID = Buffer.concat([timestampBuffer, randomBytes]);
+    currentV7UUID[6] = (currentV7UUID[6] & 0x0f) | 0x70; // Set version 7
+    currentV7UUID[8] = (currentV7UUID[8] & 0x3f) | 0x80; // Set RFC4122 variant
+
+    const currentDate = extractTimestampFromV7(currentV7UUID);
+
+    console.log(colorize.success("\nExtract timestamp from newly created UUID v7:"));
+    console.log(
+      `  ${colorize.label("UUID v7:")}       ${colorize.uuid(formatUUID(currentV7UUID))}`,
+    );
+    console.log(
+      `  ${colorize.label("Expected:")}      ${colorize.number(currentTimestamp.toString())} ms`,
+    );
+    console.log(
+      `  ${colorize.label("Extracted:")}     ${colorize.number(currentDate.getTime().toString())} ms`,
+    );
+    console.log(
+      `  ${colorize.label("Match:")}         ${currentDate.getTime() === currentTimestamp ? colorize.success("true") : colorize.error("false")}`,
+    );
+
+    // Example 3: Compare timestamps from multiple UUID v7s
+    console.log(colorize.success("\nCompare timestamps from sequential UUIDs:"));
+
+    const uuids: { uuid: UUID128; timestamp: number }[] = [];
+    for (let i = 0; i < 3; i++) {
+      const ts = Date.now() + i * 1000; // 1 second apart
+      const tsBuffer = Buffer.alloc(6);
+      tsBuffer.writeUIntBE(ts, 0, 6);
+
+      const randBytes = Buffer.alloc(10);
+      randomFillSync(randBytes);
+
+      const uuid = Buffer.concat([tsBuffer, randBytes]);
+      uuid[6] = (uuid[6] & 0x0f) | 0x70;
+      uuid[8] = (uuid[8] & 0x3f) | 0x80;
+
+      uuids.push({ uuid, timestamp: ts });
+    }
+
+    uuids.forEach((item, index) => {
+      const extracted = extractTimestampFromV7(item.uuid);
+      console.log(
+        `  ${colorize.label(`UUID ${index + 1}:`)}      ${colorize.uuid(formatUUID(item.uuid))}`,
+      );
+      console.log(`  ${colorize.label(`Timestamp:`)}   ${colorize.value(extracted.toISOString())}`);
+    });
+
+    // Example 4: Error handling for non-v7 UUID
+    console.log(colorize.success("\nError handling:"));
+    try {
+      const v4UUID = parseUUID("01234567-89ab-4000-8000-123456789abc");
+      extractTimestampFromV7(v4UUID);
+    } catch (error) {
+      console.log(
+        colorize.success(
+          `  Correctly rejected non-v7 UUID: ${colorize.dim((error as Error).message)}`,
+        ),
+      );
+    }
+
+    console.log("");
+  }
+
+  /**
+   * Example 7: Security Considerations
    */
   static securityConsiderationsExample(): void {
     console.log(colorize.header("=== Security Considerations ==="));
@@ -394,6 +489,7 @@ class UUIDv47Examples {
     this.errorHandlingExample();
     this.batchProcessingExample();
     this.integrationPatternsExample();
+    this.timestampExtractionExample();
     this.securityConsiderationsExample();
 
     console.log(colorize.rocket("All examples completed successfully! 🎉"));

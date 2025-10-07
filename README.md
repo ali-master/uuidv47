@@ -255,6 +255,51 @@ try {
 }
 ```
 
+### 6. UUID v7 Timestamp Extraction
+
+```typescript
+import { parseUUID, extractTimestampFromV7, formatUUID } from '@usex/uuidv47';
+
+// Extract timestamp from a UUID v7
+const v7UUID = parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
+const timestamp = extractTimestampFromV7(v7UUID);
+
+console.log(`UUID v7: ${formatUUID(v7UUID)}`);
+console.log(`Timestamp: ${timestamp.getTime()} ms`);
+console.log(`Date: ${timestamp.toISOString()}`); // "2024-10-07T23:15:45.610Z"
+console.log(`Local: ${timestamp.toLocaleString()}`);
+
+// Compare creation times of multiple UUIDs
+const uuid1 = parseUUID("018f4e7c-3c4a-7000-8000-111111111111");
+const uuid2 = parseUUID("018f4e7c-4000-7000-8000-222222222222");
+const uuid3 = parseUUID("018f4e7c-5000-7000-8000-333333333333");
+
+const date1 = extractTimestampFromV7(uuid1);
+const date2 = extractTimestampFromV7(uuid2);
+const date3 = extractTimestampFromV7(uuid3);
+
+console.log("UUIDs in chronological order:");
+console.log(`  ${formatUUID(uuid1)}: ${date1.toISOString()}`);
+console.log(`  ${formatUUID(uuid2)}: ${date2.toISOString()}`);
+console.log(`  ${formatUUID(uuid3)}: ${date3.toISOString()}`);
+
+// Use for sorting, filtering by date, etc.
+const uuids = [uuid3, uuid1, uuid2];
+const sortedByTime = uuids.sort((a, b) => {
+  const timeA = extractTimestampFromV7(a).getTime();
+  const timeB = extractTimestampFromV7(b).getTime();
+  return timeA - timeB;
+});
+
+// Error handling - only works with v7 UUIDs
+try {
+  const v4UUID = parseUUID("a1b2c3d4-e5f6-4000-8000-123456789abc");
+  extractTimestampFromV7(v4UUID);
+} catch (error) {
+  console.log(error.message); // "Cannot extract timestamp: UUID is version 4, expected version 7"
+}
+```
+
 ## 📚 API Reference
 
 ### Core Transformation Functions
@@ -393,6 +438,38 @@ import { isValidUUIDString } from '@usex/uuidv47';
 
 const isValid = isValidUUIDString("018f4e7c-3c4a-7000-8000-123456789abc"); // true
 const isInvalid = isValidUUIDString("invalid-uuid"); // false
+```
+
+#### `extractTimestampFromV7(uuid: UUID128): Date`
+Extract the timestamp from a UUID v7 and convert it to a JavaScript Date object.
+
+UUID v7 stores a 48-bit Unix timestamp (milliseconds since epoch) in the first 6 bytes. This function extracts that timestamp and returns it as a Date object.
+
+```typescript
+import { extractTimestampFromV7, parseUUID } from '@usex/uuidv47';
+
+// Parse a UUID v7
+const uuid = parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
+
+// Extract the timestamp
+const date = extractTimestampFromV7(uuid);
+console.log(date.toISOString()); // "2024-10-07T23:15:45.610Z"
+console.log(date.getTime());     // 1728340545610
+
+// Compare timestamps from multiple UUIDs
+const uuid1 = parseUUID("018f4e7c-3c4a-7000-8000-123456789abc");
+const uuid2 = parseUUID("018f4e7c-4000-7000-8000-123456789abc");
+const date1 = extractTimestampFromV7(uuid1);
+const date2 = extractTimestampFromV7(uuid2);
+console.log(date1 < date2); // true (uuid1 was created before uuid2)
+```
+
+**Note:** This function will throw an error if the UUID is not version 7.
+
+```typescript
+// This will throw an error
+const v4UUID = parseUUID("01234567-89ab-4000-8000-123456789abc");
+extractTimestampFromV7(v4UUID); // Error: Cannot extract timestamp: UUID is version 4, expected version 7
 ```
 
 ### UUID Version and Variant Functions

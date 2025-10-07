@@ -13,4 +13,5 @@ export {
   buildSipHashInput,
   parseUUIDWithOptions,
   isValidUUIDString,
+  extractTimestampFromV7,
 } from "./uuid";

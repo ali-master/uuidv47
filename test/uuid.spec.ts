@@ -8,9 +8,9 @@ import {
   setUUIDVersion,
   setVariantRFC4122,
   buildSipHashInput,
+  extractTimestampFromV7,
 } from "../src/uuid";
 import { UUIDVersion } from "../src/constants";
-import type { UUID128, UUIDOperationOptions } from "../src/types";
 import { allocateUUIDBuffer } from "../src/byte-operations";
 
 describe("UUID Operations", () => {
@@ -283,6 +283,137 @@ describe("UUID Operations", () => {
         const formatted = formatUUID(uuid);
         expect(formatted).toBe(expected);
       });
+    });
+  });
+
+  describe("Extract Timestamp from UUID v7", () => {
+    it("should extract timestamp from valid UUID v7", () => {
+      // Create a UUID v7 with a known timestamp
+      // UUID v7 format: the first 48 bits are timestamp in milliseconds
+      const uuid = allocateUUIDBuffer();
+
+      // Set a known timestamp: 1609459200000 (2021-01-01T00:00:00.000Z)
+      const timestamp = 1609459200000;
+      uuid.writeUIntBE(timestamp, 0, 6);
+
+      // Set version 7
+      setUUIDVersion(uuid, UUIDVersion.V7);
+      setVariantRFC4122(uuid);
+
+      const extractedDate = extractTimestampFromV7(uuid);
+      expect(extractedDate.getTime()).toBe(timestamp);
+      expect(extractedDate.toISOString()).toBe("2021-01-01T00:00:00.000Z");
+    });
+
+    it("should extract timestamp from epoch (timestamp = 0)", () => {
+      const uuid = allocateUUIDBuffer();
+
+      // Set timestamp to 0
+      uuid[0] = 0;
+      uuid[1] = 0;
+      uuid[2] = 0;
+      uuid[3] = 0;
+      uuid[4] = 0;
+      uuid[5] = 0;
+
+      setUUIDVersion(uuid, UUIDVersion.V7);
+      setVariantRFC4122(uuid);
+
+      const extractedDate = extractTimestampFromV7(uuid);
+      expect(extractedDate.getTime()).toBe(0);
+      expect(extractedDate.toISOString()).toBe("1970-01-01T00:00:00.000Z");
+    });
+
+    it("should extract timestamp from recent date", () => {
+      const uuid = allocateUUIDBuffer();
+
+      // Set a recent timestamp: 1728340545678 (2024-10-07T23:15:45.678Z)
+      const timestamp = 1728340545678;
+      uuid.writeUIntBE(timestamp, 0, 6);
+
+      setUUIDVersion(uuid, UUIDVersion.V7);
+      setVariantRFC4122(uuid);
+
+      const extractedDate = extractTimestampFromV7(uuid);
+      expect(extractedDate.getTime()).toBe(timestamp);
+    });
+
+    it("should extract timestamp from maximum 48-bit value", () => {
+      const uuid = allocateUUIDBuffer();
+
+      // Set the maximum 48-bit timestamp (281474976710655)
+      uuid[0] = 0xff;
+      uuid[1] = 0xff;
+      uuid[2] = 0xff;
+      uuid[3] = 0xff;
+      uuid[4] = 0xff;
+      uuid[5] = 0xff;
+
+      setUUIDVersion(uuid, UUIDVersion.V7);
+      setVariantRFC4122(uuid);
+
+      const extractedDate = extractTimestampFromV7(uuid);
+      expect(extractedDate.getTime()).toBe(281474976710655);
+    });
+
+    it("should throw error for non-v7 UUID (v4)", () => {
+      const uuid = allocateUUIDBuffer();
+
+      // Set some timestamp data
+      const timestamp = 1609459200000;
+      uuid.writeUIntBE(timestamp, 0, 6);
+
+      // Set version 4 instead of 7
+      setUUIDVersion(uuid, UUIDVersion.V4);
+      setVariantRFC4122(uuid);
+
+      expect(() => extractTimestampFromV7(uuid)).toThrow(
+        "Cannot extract timestamp: UUID is version 4, expected version 7",
+      );
+    });
+
+    it("should throw error for invalid version", () => {
+      const uuid = allocateUUIDBuffer();
+
+      // Set version 0
+      setUUIDVersion(uuid, 0 as unknown as UUIDVersion);
+
+      expect(() => extractTimestampFromV7(uuid)).toThrow(
+        "Cannot extract timestamp: UUID is version 0, expected version 7",
+      );
+    });
+
+    it("should work with parsed UUID v7 string", () => {
+      // Parse a real UUID v7 string
+      // This UUID has timestamp bytes: 01 8f 4e 7c 3c 4a
+      // Which represents timestamp: 0x018f4e7c3c4a = 1728340545610
+      const uuidString = "018f4e7c-3c4a-7000-8000-123456789abc";
+      const uuid = parseUUID(uuidString);
+
+      const extractedDate = extractTimestampFromV7(uuid);
+      const expectedTimestamp = 0x018f4e7c3c4a;
+
+      expect(extractedDate.getTime()).toBe(expectedTimestamp);
+    });
+
+    it("should handle multiple extractions consistently", () => {
+      const uuid = allocateUUIDBuffer();
+
+      const timestamp = 1609459200000;
+      uuid.writeUIntBE(timestamp, 0, 6);
+
+      setUUIDVersion(uuid, UUIDVersion.V7);
+      setVariantRFC4122(uuid);
+
+      const date1 = extractTimestampFromV7(uuid);
+      const date2 = extractTimestampFromV7(uuid);
+      const date3 = extractTimestampFromV7(uuid);
+
+      expect(date1.getTime()).toBe(timestamp);
+      expect(date2.getTime()).toBe(timestamp);
+      expect(date3.getTime()).toBe(timestamp);
+      expect(date1.getTime()).toBe(date2.getTime());
+      expect(date2.getTime()).toBe(date3.getTime());
     });
   });
 });
