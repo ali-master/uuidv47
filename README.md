@@ -6,7 +6,7 @@
 [![NPM Version](https://img.shields.io/npm/v/@usex/uuidv47?style=flat-square&color=blue)](https://www.npmjs.com/package/@usex/uuidv47)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Test Coverage](https://img.shields.io/badge/coverage-80%2B-brightgreen?style=flat-square)](https://github.com/ali-master/uuidv47)
+[![Test Coverage](https://img.shields.io/badge/coverage-100-brightgreen?style=flat-square)](https://github.com/ali-master/uuidv47)
 [![Bundle Size](https://img.shields.io/badge/bundle-5.71KB-brightgreen?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
 [![Minified + Gzipped](https://img.shields.io/badge/gzipped-2.25KB-success?style=flat-square)](https://bundlephobia.com/package/@usex/uuidv47)
 
