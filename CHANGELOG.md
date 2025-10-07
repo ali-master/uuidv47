@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/ali-master/uuidv47/compare/1.1.0...1.2.0) (2025-10-07)
+
+### Features
+
+* **ci:** add slug for Codecov integration in CI configuration ([d952809](https://github.com/ali-master/uuidv47/commit/d9528094aa3c33567346a4cad7268d07234e1aec))
+* **uuid:** add UUID v7 timestamp extraction support ([c7b54cd](https://github.com/ali-master/uuidv47/commit/c7b54cdb54e2784367df2683af0f376734166fe0))
+
+### Bug Fixes
+
+* **svg:** update text for clarity in social preview graphic ([a009ced](https://github.com/ali-master/uuidv47/commit/a009ced9fee7b575e78c2246f00d1b159e8c9f31))
+* **tests:** reorder CI environment variable for test execution ([f3eb125](https://github.com/ali-master/uuidv47/commit/f3eb125cdef1e7f05578bd5fda9569d7ecb2b49d))
+
+### Chores
+
+* **deps:** bump bunup to v0.11.27 and update lockfile ([047f63c](https://github.com/ali-master/uuidv47/commit/047f63cfe6ff0da39d8b12851f4ee4ccbdf4e605))
+
 ## [1.1.0](https://github.com/ali-master/uuidv47/compare/1.0.0...1.1.0) (2025-09-22)
 
 ### Features
